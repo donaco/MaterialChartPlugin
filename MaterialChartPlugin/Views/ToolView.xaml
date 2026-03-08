@@ -130,6 +130,43 @@
                 <Setter Property="DaysIntervalStringFormat" Value="{}{0:MM/dd}"/>
                 <Setter Property="HoursIntervalStringFormat" Value="{}{0:HH:mm}"/>
             </Style>
+            <!-- 期間選択ボタン用スタイル -->
+            <Style x:Key="PeriodToggleButtonStyle" TargetType="{x:Type RadioButton}">
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type RadioButton}">
+                            <Border x:Name="border"
+                                    BorderBrush="{DynamicResource BorderBrushKey}"
+                                    BorderThickness="1"
+                                    Background="Transparent"
+                                    Padding="8,4"
+                                    Margin="0,0,2,0"
+                                    SnapsToDevicePixels="True">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter TargetName="border" Property="Background" Value="{DynamicResource AccentBrushKey}"/>
+                                    <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource AccentBrushKey}"/>
+                                </Trigger>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="border" Property="Background" Value="{DynamicResource SemiactiveBackgroundBrushKey}"/>
+                                </Trigger>
+                                <MultiTrigger>
+                                    <MultiTrigger.Conditions>
+                                        <Condition Property="IsMouseOver" Value="True"/>
+                                        <Condition Property="IsChecked" Value="True"/>
+                                    </MultiTrigger.Conditions>
+                                    <Setter TargetName="border" Property="Background" Value="{DynamicResource AccentActiveBrushKey}"/>
+                                </MultiTrigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+                <Setter Property="Foreground" Value="{DynamicResource ActiveForegroundBrushKey}"/>
+                <Setter Property="FontSize" Value="12"/>
+                <Setter Property="Cursor" Value="Hand"/>
+            </Style>
         </ResourceDictionary>
     </UserControl.Resources>
     <ScrollViewer>
@@ -179,10 +216,24 @@
                 </Grid.ColumnDefinitions>
                 <StackPanel Orientation="Horizontal" Margin="0" VerticalAlignment="Center">
                     <TextBlock Text="グラフの表示期間" Margin="0,0,10,0" VerticalAlignment="Center"/>
-                    <Custom:PromptComboBox x:Name="promptComboBox" ItemsSource="{Binding DisplayedPeriods}" 
-						DisplayMemberPath="Display" SelectedValuePath="Value" 
-						SelectedValue="{Binding Value, Mode=Twoway, Source={x:Static settings:ChartSettings.DisplayedPeriod}, UpdateSourceTrigger=PropertyChanged}"
-						Prompt="" MinWidth="80"/>
+                    <RadioButton Content="1日" GroupName="DisplayedPeriod" Style="{StaticResource PeriodToggleButtonStyle}"
+                                 Width="50"
+                                 IsChecked="{Binding Value, Source={x:Static settings:ChartSettings.DisplayedPeriod}, Converter={converters:EnumToBooleanConverter}, ConverterParameter=OneDay}"/>
+                    <RadioButton Content="1週間" GroupName="DisplayedPeriod" Style="{StaticResource PeriodToggleButtonStyle}"
+                                 Width="50"
+                                 IsChecked="{Binding Value, Source={x:Static settings:ChartSettings.DisplayedPeriod}, Converter={converters:EnumToBooleanConverter}, ConverterParameter=OneWeek}"/>
+                    <RadioButton Content="1ヶ月" GroupName="DisplayedPeriod" Style="{StaticResource PeriodToggleButtonStyle}"
+                                 Width="50"
+                                 IsChecked="{Binding Value, Source={x:Static settings:ChartSettings.DisplayedPeriod}, Converter={converters:EnumToBooleanConverter}, ConverterParameter=OneMonth}"/>
+                    <RadioButton Content="3ヶ月" GroupName="DisplayedPeriod" Style="{StaticResource PeriodToggleButtonStyle}"
+                                 Width="50"
+                                 IsChecked="{Binding Value, Source={x:Static settings:ChartSettings.DisplayedPeriod}, Converter={converters:EnumToBooleanConverter}, ConverterParameter=ThreeMonths}"/>
+                    <RadioButton Content="1年" GroupName="DisplayedPeriod" Style="{StaticResource PeriodToggleButtonStyle}"
+                                 Width="50"
+                                 IsChecked="{Binding Value, Source={x:Static settings:ChartSettings.DisplayedPeriod}, Converter={converters:EnumToBooleanConverter}, ConverterParameter=OneYear}"/>
+                    <RadioButton Content="3年" GroupName="DisplayedPeriod" Style="{StaticResource PeriodToggleButtonStyle}"
+                                 Width="50"
+                                 IsChecked="{Binding Value, Source={x:Static settings:ChartSettings.DisplayedPeriod}, Converter={converters:EnumToBooleanConverter}, ConverterParameter=ThreeYears}"/>
                 </StackPanel>
             </Grid>
 
@@ -206,9 +257,9 @@
             </chartingToolkit:Chart>
             <Border BorderBrush="{DynamicResource BorderBrushKey}" BorderThickness="0,0,0,1" Margin="0,20,0,10" />
             <WrapPanel Margin="10,0,10,10">
-                <controls:CallMethodButton Content="バックアップデータのインポート" MethodName="ImportMaterialData" Width="180" HorizontalAlignment="Left" VerticalAlignment="Center" Height="35" Margin="0,5,20,5"/>
-                <controls:CallMethodButton Content="バックアップデータのエクスポート" MethodName="ExportMaterialData" Width="180" HorizontalAlignment="Left" VerticalAlignment="Center" Height="35" Margin="0,5,20,5"/>
-                <controls:CallMethodButton Content=".csv形式でエクスポート" MethodName="ExportAsCsv" Width="180" HorizontalAlignment="Left" VerticalAlignment="Center" Height="35" Margin="0,5,20,5"/>
+                <controls:CallMethodButton Content="バックアップデータのインポート" MethodName="ImportMaterialData" Width="180" HorizontalAlignment="Left" VerticalAlignment="Center" Height="35" Margin="0,5,10,5"/>
+                <controls:CallMethodButton Content="バックアップデータのエクスポート" MethodName="ExportMaterialData" Width="180" HorizontalAlignment="Left" VerticalAlignment="Center" Height="35" Margin="0,5,10,5"/>
+                <controls:CallMethodButton Content=".csv形式でエクスポート" MethodName="ExportAsCsv" Width="180" HorizontalAlignment="Left" VerticalAlignment="Center" Height="35" Margin="0,5,10,5"/>
                 <!-- ポップアップボタン（ポップアップ内では非表示） -->
                 <metro2:CallMethodButton Content="別ウィンドウで表示"
 													 MethodName="OpenPopupWindow"

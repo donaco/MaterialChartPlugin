@@ -207,6 +207,7 @@
     <Compile Include="Models\Utilities\ChartExtensions.cs" />
     <Compile Include="Models\Utilities\ChartUtilities.cs" />
     <Compile Include="ViewModels\ToolViewModel.cs" />
+    <Compile Include="Views\Converters\EnumToBooleanConverter.cs" />
     <Compile Include="Views\Converters\InverseBoolToVisibilityConverter.cs" />
     <Compile Include="Views\Converters\SolidBrushToTransparentBrushConverter.cs" />
     <Compile Include="Views\MaterialWindow.xaml.cs">
