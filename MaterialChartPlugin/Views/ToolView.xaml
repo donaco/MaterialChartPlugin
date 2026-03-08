@@ -12,15 +12,17 @@
              xmlns:chartingToolkit="clr-namespace:System.Windows.Controls.DataVisualization.Charting;assembly=System.Windows.Controls.DataVisualization.Toolkit"
              xmlns:visualizationToolkit="clr-namespace:System.Windows.Controls.DataVisualization;assembly=System.Windows.Controls.DataVisualization.Toolkit"
              xmlns:Primitives="clr-namespace:System.Windows.Controls.DataVisualization.Charting.Primitives;assembly=System.Windows.Controls.DataVisualization.Toolkit" x:Class="MaterialChartPlugin.Views.ToolView"
-             Background="{DynamicResource ThemeBrushKey}"
+             xmlns:metro2="http://schemes.grabacr.net/winfx/2015/personal/controls"
+    Background="{DynamicResource ThemeBrushKey}"
              Foreground="{DynamicResource ActiveForegroundBrushKey}"
              mc:Ignorable="d" 
-             d:DesignHeight="700" d:DesignWidth="600" d:DataContext="{d:DesignData /SampleData/ToolViewModelSampleData.xaml}">
+             d:DesignHeight="800" d:DesignWidth="600" d:DataContext="{d:DesignData /SampleData/ToolViewModelSampleData.xaml}">
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="../Styles/PluginStyle.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+            <converters:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibilityConverter"/>
             <converters:SolidBrushToTransparentBrushConverter x:Key="BorderBrushToFillBrushConverter"/>
             <!-- データポイントを表示しないようにするスタイル（↓ の Simple[Line/Area]SeriesStyleで使用） -->
             <Style x:Key="EmptyLineDataPointsStyle" TargetType="{x:Type chartingToolkit:LineDataPoint}">
@@ -207,6 +209,13 @@
                 <controls:CallMethodButton Content="バックアップデータのインポート" MethodName="ImportMaterialData" Width="180" HorizontalAlignment="Left" VerticalAlignment="Center" Height="35" Margin="0,5,20,5"/>
                 <controls:CallMethodButton Content="バックアップデータのエクスポート" MethodName="ExportMaterialData" Width="180" HorizontalAlignment="Left" VerticalAlignment="Center" Height="35" Margin="0,5,20,5"/>
                 <controls:CallMethodButton Content=".csv形式でエクスポート" MethodName="ExportAsCsv" Width="180" HorizontalAlignment="Left" VerticalAlignment="Center" Height="35" Margin="0,5,20,5"/>
+                <!-- ポップアップボタン（ポップアップ内では非表示） -->
+                <metro2:CallMethodButton Content="別ウィンドウで表示"
+													 MethodName="OpenPopupWindow"
+													 HorizontalAlignment="Stretch"
+													 Margin="0,5,20,5"
+                                                     Height="35" 
+													 Visibility="{Binding IsPopupMode, Converter={StaticResource InverseBoolToVisibilityConverter}}" />
             </WrapPanel>
         </StackPanel>
     </ScrollViewer>

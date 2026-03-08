@@ -34,6 +34,40 @@ namespace MaterialChartPlugin.ViewModels
 
         public int RepairTool => materialManager.RepairTool;
 
+        #region IsPopupMode変更通知プロパティ
+        private bool _IsPopupMode;
+
+        public bool IsPopupMode
+        {
+            get
+            { return _IsPopupMode; }
+            set
+            {
+                if (_IsPopupMode == value)
+                    return;
+                _IsPopupMode = value;
+                RaisePropertyChanged();
+            }
+        }
+        #endregion
+
+        #region IsTopMost変更通知プロパティ
+        private bool _IsTopMost;
+
+        public bool IsTopMost
+        {
+            get
+            { return _IsTopMost; }
+            set
+            {
+                if (_IsTopMost == value)
+                    return;
+                _IsTopMost = value;
+                RaisePropertyChanged();
+            }
+        }
+        #endregion
+
         #region FuelSeries変更通知プロパティ
         private ObservableCollection<ChartPoint> _FuelSeries = new ObservableCollection<ChartPoint>();
 
@@ -277,6 +311,20 @@ namespace MaterialChartPlugin.ViewModels
                 .Where(_ => materialManager.Log.HasLoaded)
                 .Throttle(TimeSpan.FromMilliseconds(10))
                 .Subscribe(_ => UpdateData(history.Last()));
+        }
+
+        /// <summary>
+        /// ポップアップウィンドウを開きます。
+        /// </summary>
+        public void OpenPopupWindow()
+        {
+            var window = new Views.MaterialWindow
+            {
+                DataContext = this,
+            };
+            IsPopupMode = true;
+            window.Closed += (s, e) => IsPopupMode = false;
+            window.Show();
         }
 
         /// <summary>
