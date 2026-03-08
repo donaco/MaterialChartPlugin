@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Linq;
+using System.Reactive.Disposables;
 using System.Text;
 using System.Threading.Tasks;
 using Livet;
@@ -211,6 +212,8 @@ namespace MaterialChartPlugin.ViewModels
 
         int mostRepairTool = 0;
 
+        private readonly CompositeDisposable disposables = new CompositeDisposable();
+
         PropertyChangedEventListener managerChangedListener;
 
         PropertyChangedEventListener logChangedListener;
@@ -260,11 +263,11 @@ namespace MaterialChartPlugin.ViewModels
                         {
                             // materialManagerの初期化が完了したら、DisplayedPeriodの変更時に更新を行うよう設定
                             nameof(materialManager.IsAvailable),
-                            (_,__) => ChartSettings.DisplayedPeriod.Subscribe(___ =>
+                            (_,__) => disposables.Add(ChartSettings.DisplayedPeriod.Subscribe(___ =>
                                 {
                                     RefleshData();
                                     RaisePropertyChanged(nameof(DisplayedPeriod));
-                                }).AddTo(this)
+                                }))
                         }
                     };
 
@@ -426,6 +429,15 @@ namespace MaterialChartPlugin.ViewModels
         public async void ExportMaterialData()
         {
             await materialManager.Log.ExportAsync();
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                disposables.Dispose();
+            }
+            base.Dispose(disposing);
         }
     }
 }
