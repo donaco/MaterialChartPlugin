@@ -56,11 +56,6 @@
 * **ライセンス :** Apache License Version 2.0
 * **ライセンス全文 :** [licenses/ApacheLicense2.0.txt](licenses/ApacheLicense2.0.txt)
 
-#### [protobuf-net](https://code.google.com/p/protobuf-net/)
-
-* **ライセンス :** Apache License 2.0 
-* **ライセンス全文 :** [licenses/ApacheLicense2.0.txt](licenses/ApacheLicense2.0.txt)
-
 #### [Silverlight/WPF Data Visualization](http://dlaa.me/blog/post/9999344)
 
 > The MIT License (MIT)
