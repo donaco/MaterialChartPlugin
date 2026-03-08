@@ -1,5 +1,4 @@
 # MaterialChartPlugin
---
 
 [![Release](https://img.shields.io/github/release/donaco/MaterialChartPlugin.svg?style=flat-square)](https://github.com/donaco/MaterialChartPlugin/releases/latest)
 [![Downloads](https://img.shields.io/github/downloads/donaco/MaterialChartPlugin/latest/total.svg?style=flat-square)](https://github.com/donaco/MaterialChartPlugin/releases/latest)
@@ -13,6 +12,7 @@
 * ポップアップウィンドウでのグラフ表示
 
 ### インストール
+* KanColleViewer 4.7.0 以降が必要です。
 * "MaterialChartPlugin.dll"をKanColleViewerの"Plugins"ディレクトリに移動してください。
 * "System.Windows.Controls.DataVisualization.Toolkit.dll"をKanColleViewer.exeと同じディレクトリに移動してください。
 
