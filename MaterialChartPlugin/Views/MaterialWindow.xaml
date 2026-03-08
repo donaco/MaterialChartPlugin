@@ -43,7 +43,7 @@
 							  BandVisibility="Collapsed" />
 
                 <TextBlock Grid.Column="1"
-						   Text="MaterialChart"
+						   Text="資源一覧"
 						   Style="{DynamicResource CaptionTextStyleKey}"
 						   Margin="2,0,8,0" />
 
