@@ -6,11 +6,11 @@
 * 資材データの自動記録
 * 資材・高速修復材のグラフ表示
 * .csv形式での資材データのエクスポート
+* ポップアップウィンドウでのグラフ表示
 
 ### インストール
-
 * "MaterialChartPlugin.dll"をKanColleViewerの"Plugins"ディレクトリに移動してください。
-* "protobuf-net.dll"および"System.Windows.Controls.DataVisualization.Toolkit.dll"をKanColleViewer.exeと同じディレクトリに移動してください。
+* "System.Windows.Controls.DataVisualization.Toolkit.dll"をKanColleViewer.exeと同じディレクトリに移動してください。
 
 ### ライセンス
 
