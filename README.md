@@ -1,4 +1,8 @@
 # MaterialChartPlugin
+--
+
+[![Release](https://img.shields.io/github/release/donaco/MaterialChartPlugin.svg?style=flat-square)](https://github.com/donaco/MaterialChartPlugin/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/donaco/MaterialChartPlugin/latest/total.svg?style=flat-square)](https://github.com/donaco/MaterialChartPlugin/releases/latest)
 
 資材のグラフを表示するKanColleViewer用プラグインです。
 
@@ -18,19 +22,8 @@
 
 ### ダウンロード
 
-[![Release](https://img.shields.io/github/release/terry-u16/MaterialChartPlugin.svg?style=flat-square)](https://github.com/terry-u16/MaterialChartPlugin/releases/latest) [MaterialChartPlugin - GitHub Releases Page](https://github.com/terry-u16/MaterialChartPlugin/releases/latest)
+[![Release](https://img.shields.io/github/release/donaco/MaterialChartPlugin.svg?style=flat-square)](https://github.com/donaco/MaterialChartPlugin/releases/latest) [MaterialChartPlugin - GitHub Releases Page](https://github.com/donaco/MaterialChartPlugin/releases/latest)
 
-### AppVeyor
-
-#### masterブランチ（安定版）
-
-[![Build status](https://img.shields.io/appveyor/ci/terry-u16/materialchartplugin.svg?style=flat-square)](https://ci.appveyor.com/project/terry-u16/materialchartplugin) [MaterialChartPlugin_Stable - AppVeyor](https://ci.appveyor.com/project/terry-u16/materialchartplugin/build/artifacts)
-
-#### developブランチ（開発版）
-
-こちらから開発版バイナリのダウンロードが可能です。
-
-[![Build status](https://img.shields.io/appveyor/ci/terry-u16/materialchartplugin-avd09.svg?style=flat-square)](https://ci.appveyor.com/project/terry-u16/materialchartplugin-avd09) [MaterialChartPlugin_Develop - AppVeyor](https://ci.appveyor.com/project/terry-u16/materialchartplugin-avd09/build/artifacts)
 
 ### 使用ライブラリ
 
