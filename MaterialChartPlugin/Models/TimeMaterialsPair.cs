@@ -1,67 +1,63 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ProtoBuf;
+using System.Runtime.Serialization;
 
 namespace MaterialChartPlugin.Models
 {
-    [ProtoContract]
+    [DataContract]
     public class TimeMaterialsPair : IEquatable<TimeMaterialsPair>
     {
         /// <summary>
         /// 時刻
         /// </summary>
-        [ProtoMember(1)]
+        [DataMember(Order = 1)]
         public DateTime DateTime { get; private set; }
 
         /// <summary>
         /// 燃料
         /// </summary>
-        [ProtoMember(2)]
+        [DataMember(Order = 2)]
         public int Fuel { get; private set; }
 
         /// <summary>
         /// 弾薬
         /// </summary>
-        [ProtoMember(3)]
+        [DataMember(Order = 3)]
         public int Ammunition { get; private set; }
 
         /// <summary>
         /// 鋼材
         /// </summary>
-        [ProtoMember(4)]
+        [DataMember(Order = 4)]
         public int Steel { get; private set; }
 
         /// <summary>
         /// ボーキサイト
         /// </summary>
-        [ProtoMember(5)]
+        [DataMember(Order = 5)]
         public int Bauxite { get; private set; }
 
         /// <summary>
         /// 高速修復材
         /// </summary>
-        [ProtoMember(6)]
+        [DataMember(Order = 6)]
         public int RepairTool { get; private set; }
 
         /// <summary>
         /// 開発資材
         /// </summary>
-        [ProtoMember(7)]
+        [DataMember(Order = 7)]
         public int DevelopmentTool { get; private set; }
 
         /// <summary>
         /// 高速建造材
         /// </summary>
-        [ProtoMember(8)]
+        [DataMember(Order = 8)]
         public int InstantBuildTool { get; private set; }
 
         /// <summary>
         /// 回収資材
         /// </summary>
-        [ProtoMember(9)]
+        [DataMember(Order = 9)]
         public int ImprovementTool { get; private set; }
 
         public int MostMaterial => Math.Max(Math.Max(Math.Max(Fuel, Ammunition), Steel), Bauxite);

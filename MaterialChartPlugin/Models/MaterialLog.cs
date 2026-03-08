@@ -8,7 +8,6 @@ using System.IO;
 using System.Runtime.Serialization;
 using System.Xml;
 using Livet;
-using ProtoBuf;
 using Grabacr07.KanColleWrapper;
 
 namespace MaterialChartPlugin.Models
@@ -26,6 +25,11 @@ namespace MaterialChartPlugin.Models
         static string SaveFilePath => Path.Combine(localDirectoryPath, saveFileName);
 
         private MaterialChartPlugin plugin;
+
+        private readonly object _saveLock = new object();
+
+        private static readonly DataContractSerializer serializer =
+            new DataContractSerializer(typeof(List<TimeMaterialsPair>));
 
         #region HasLoaded変更通知プロパティ
         private bool _HasLoaded = false;
@@ -64,27 +68,42 @@ namespace MaterialChartPlugin.Models
             {
                 try
                 {
-                    using (var stream = File.OpenRead(filePath))
+                    var list = await Task.Run(() =>
                     {
-                        this.History = await Task.Run(() => Serializer.Deserialize<ObservableCollection<TimeMaterialsPair>>(stream));
-                    }
+                        using (var stream = File.OpenRead(filePath))
+                        using (var reader = XmlDictionaryReader.CreateBinaryReader(stream, XmlDictionaryReaderQuotas.Max))
+                        {
+                            return (List<TimeMaterialsPair>)serializer.ReadObject(reader);
+                        }
+                    });
+
+                    this.History = new ObservableCollection<TimeMaterialsPair>(list);
                     onSuccess?.Invoke();
                 }
-                catch (ProtoException ex)
+                catch (SerializationException ex)
                 {
-                    plugin.InvokeNotifyRequested(new Grabacr07.KanColleViewer.Composition.NotifyEventArgs(
-                        "MaterialChartPlugin.LoadFailed", "読み込み失敗",
-                        "資材データの読み込みに失敗しました。データが破損している可能性があります。"));
-                    System.Diagnostics.Debug.WriteLine(ex);
-                    if (this.History == null)
-                        this.History = new ObservableCollection<TimeMaterialsPair>();
+                    // 旧形式(protobuf-net)のデータファイルは読めないためリネームして退避
+                    System.Diagnostics.Debug.WriteLine($"MaterialLog: Old format detected, renaming - {ex.Message}");
+                    try
+                    {
+                        var backupPath = filePath + ".old";
+                        if (File.Exists(backupPath))
+                            File.Delete(backupPath);
+                        File.Move(filePath, backupPath);
+                    }
+                    catch (IOException ioEx)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"MaterialLog: Failed to rename old file - {ioEx.Message}");
+                    }
+
+                    this.History = new ObservableCollection<TimeMaterialsPair>();
                 }
-                catch (IOException ex)
+                catch (Exception ex)
                 {
                     plugin.InvokeNotifyRequested(new Grabacr07.KanColleViewer.Composition.NotifyEventArgs(
                         "MaterialChartPlugin.LoadFailed", "読み込み失敗",
-                        "資材データの読み込みに失敗しました。必要なアクセス権限がない可能性があります。"));
-                    System.Diagnostics.Debug.WriteLine(ex);
+                        "資材データの読み込みに失敗しました。データが破損しているか、形式が古い可能性があります。"));
+                    System.Diagnostics.Debug.WriteLine($"MaterialLog: Load exception - {ex}");
                     if (this.History == null)
                         this.History = new ObservableCollection<TimeMaterialsPair>();
                 }
@@ -104,40 +123,38 @@ namespace MaterialChartPlugin.Models
             {
                 await SaveAsync(localDirectoryPath, SaveFilePath, null);
             }
-            catch (IOException ex)
+            catch (Exception ex)
             {
                 plugin.InvokeNotifyRequested(new Grabacr07.KanColleViewer.Composition.NotifyEventArgs(
-                    "MaterialChartPlugin.SaveFailed", "読み込み失敗",
-                    "資材データの保存に失敗しました。必要なアクセス権限がない可能性があります。"));
+                    "MaterialChartPlugin.SaveFailed", "保存失敗",
+                    $"資材データの保存に失敗しました: {ex.GetType().Name}: {ex.Message}"));
                 System.Diagnostics.Debug.WriteLine(ex);
             }
         }
 
         private async Task SaveAsync(string directoryPath, string filePath, Action onSuccess)
         {
-            try
+            if (!Directory.Exists(directoryPath))
             {
-                if (!Directory.Exists(directoryPath))
-                {
-                    Directory.CreateDirectory(directoryPath);
-                }
+                Directory.CreateDirectory(directoryPath);
+            }
 
-                // オレオレ形式でバイナリ保存とかも考えたけど
-                // 今後ネジみたいに新しい資材が入ってくると対応が面倒なのでやめた
+            List<TimeMaterialsPair> snapshot;
+            lock (_saveLock)
+            {
+                snapshot = History.ToList();
+            }
+
+            await Task.Run(() =>
+            {
                 using (var stream = new FileStream(filePath, FileMode.Create, FileAccess.Write))
+                using (var writer = XmlDictionaryWriter.CreateBinaryWriter(stream))
                 {
-                    await Task.Run(() => Serializer.Serialize(stream, History));
+                    serializer.WriteObject(writer, snapshot);
                 }
+            });
 
-                onSuccess?.Invoke();
-            }
-            catch (IOException ex)
-            {
-                plugin.InvokeNotifyRequested(new Grabacr07.KanColleViewer.Composition.NotifyEventArgs(
-                    "MaterialChartPlugin.SaveFailed", "保存失敗",
-                    "資材データの保存に失敗しました。必要なアクセス権限がない可能性があります。"));
-                System.Diagnostics.Debug.WriteLine(ex);
-            }
+            onSuccess?.Invoke();
         }
 
         public async Task ExportAsCsvAsync()
@@ -197,7 +214,6 @@ namespace MaterialChartPlugin.Models
                     await SaveAsync();
                 }
             );
-
         }
 
         public async Task ExportAsync()

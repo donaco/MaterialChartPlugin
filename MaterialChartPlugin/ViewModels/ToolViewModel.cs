@@ -254,63 +254,87 @@ namespace MaterialChartPlugin.ViewModels
 
         public ToolViewModel(MaterialChartPlugin plugin)
         {
-            this.plugin = plugin;
-
-            this.materialManager = new MaterialManager(plugin);
-
-            this.DisplayedPeriods = new List<DisplayViewModel<DisplayedPeriod>>()
+            try
             {
-                DisplayViewModel.Create(DisplayedPeriod.OneDay, "1日"),
-                DisplayViewModel.Create(DisplayedPeriod.OneWeek, "1週間"),
-                DisplayViewModel.Create(DisplayedPeriod.OneMonth, "1ヶ月"),
-                DisplayViewModel.Create(DisplayedPeriod.ThreeMonths, "3ヶ月"),
-                DisplayViewModel.Create(DisplayedPeriod.OneYear, "1年"),
-                DisplayViewModel.Create(DisplayedPeriod.ThreeYears, "3年")
-            };
+                System.Diagnostics.Debug.WriteLine("ToolViewModel: Constructor started");
+                
+                this.plugin = plugin;
+
+                this.materialManager = new MaterialManager(plugin);
+
+                this.DisplayedPeriods = new List<DisplayViewModel<DisplayedPeriod>>()
+                {
+                    DisplayViewModel.Create(DisplayedPeriod.OneDay, "1日"),
+                    DisplayViewModel.Create(DisplayedPeriod.OneWeek, "1週間"),
+                    DisplayViewModel.Create(DisplayedPeriod.OneMonth, "1ヶ月"),
+                    DisplayViewModel.Create(DisplayedPeriod.ThreeMonths, "3ヶ月"),
+                    DisplayViewModel.Create(DisplayedPeriod.OneYear, "1年"),
+                    DisplayViewModel.Create(DisplayedPeriod.ThreeYears, "3年")
+                };
+                
+                System.Diagnostics.Debug.WriteLine("ToolViewModel: Constructor completed");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"ToolViewModel constructor failed: {ex}");
+                throw;
+            }
         }
 
         public async void Initialize()
         {
-            await materialManager.Initialize();
+            try
+            {
+                System.Diagnostics.Debug.WriteLine("ToolViewModel: Initialize started");
+                
+                await materialManager.Initialize();
 
-            var history = materialManager.Log.History;
+                var history = materialManager.Log.History;
 
-            // データ初期読み込み
-            logChangedListener = new PropertyChangedEventListener(materialManager.Log)
-                {
-                    { nameof(materialManager.Log.HasLoaded), (_, __) =>
-                        {
-                            if (materialManager.Log.HasLoaded)
-                                RefleshData();
-                        }
-                    }
-                };
-
-            // 資材データの通知設定
-            managerChangedListener = new PropertyChangedEventListener(materialManager)
+                // データ初期読み込み
+                logChangedListener = new PropertyChangedEventListener(materialManager.Log)
                     {
-                        { nameof(materialManager.Fuel),  (_,__) => RaisePropertyChanged(nameof(Fuel)) },
-                        { nameof(materialManager.Ammunition),  (_,__) => RaisePropertyChanged(nameof(Ammunition)) },
-                        { nameof(materialManager.Steel),  (_,__) => RaisePropertyChanged(nameof(Steel)) },
-                        { nameof(materialManager.Bauxite),  (_,__) => RaisePropertyChanged(nameof(Bauxite)) },
-                        { nameof(materialManager.RepairTool),  (_,__) => RaisePropertyChanged(nameof(RepairTool)) },
-                        {
-                            // materialManagerの初期化が完了したら、DisplayedPeriodの変更時に更新を行うよう設定
-                            nameof(materialManager.IsAvailable),
-                            (_,__) => disposables.Add(ChartSettings.DisplayedPeriod.Subscribe(___ =>
-                                {
+                        { nameof(materialManager.Log.HasLoaded), (_, __) =>
+                            {
+                                if (materialManager.Log.HasLoaded)
                                     RefleshData();
-                                    RaisePropertyChanged(nameof(DisplayedPeriod));
-                                }))
+                            }
                         }
                     };
 
-            // データ更新設定
-            Observable.FromEvent<NotifyCollectionChangedEventHandler, NotifyCollectionChangedEventArgs>
-                (h => (sender, e) => h(e), h => history.CollectionChanged += h, h => history.CollectionChanged -= h)
-                .Where(_ => materialManager.Log.HasLoaded)
-                .Throttle(TimeSpan.FromMilliseconds(10))
-                .Subscribe(_ => UpdateData(history.Last()));
+                // 資材データの通知設定
+                managerChangedListener = new PropertyChangedEventListener(materialManager)
+                        {
+                            { nameof(materialManager.Fuel),  (_,__) => RaisePropertyChanged(nameof(Fuel)) },
+                            { nameof(materialManager.Ammunition),  (_,__) => RaisePropertyChanged(nameof(Ammunition)) },
+                            { nameof(materialManager.Steel),  (_,__) => RaisePropertyChanged(nameof(Steel)) },
+                            { nameof(materialManager.Bauxite),  (_,__) => RaisePropertyChanged(nameof(Bauxite)) },
+                            { nameof(materialManager.RepairTool),  (_,__) => RaisePropertyChanged(nameof(RepairTool)) },
+                            {
+                                // materialManagerの初期化が完了したら、DisplayedPeriodの変更時に更新を行うよう設定
+                                nameof(materialManager.IsAvailable),
+                                (_,__) => disposables.Add(ChartSettings.DisplayedPeriod.Subscribe(___ =>
+                                    {
+                                        RefleshData();
+                                        RaisePropertyChanged(nameof(DisplayedPeriod));
+                                    }))
+                            }
+                        };
+
+                // データ更新設定
+                Observable.FromEvent<NotifyCollectionChangedEventHandler, NotifyCollectionChangedEventArgs>
+                    (h => (sender, e) => h(e), h => history.CollectionChanged += h, h => history.CollectionChanged -= h)
+                    .Where(_ => materialManager.Log.HasLoaded)
+                    .Throttle(TimeSpan.FromMilliseconds(10))
+                    .Subscribe(_ => UpdateData(history.Last()));
+                    
+                System.Diagnostics.Debug.WriteLine("ToolViewModel: Initialize completed");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"ToolViewModel Initialize failed: {ex}");
+                throw;
+            }
         }
 
         /// <summary>

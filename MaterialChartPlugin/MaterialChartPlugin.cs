@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 using MaterialChartPlugin.Views;
 using MaterialChartPlugin.ViewModels;
 using Livet;
+using System.IO;
+using System.Reflection;
 
 namespace MaterialChartPlugin
 {
@@ -36,10 +38,13 @@ namespace MaterialChartPlugin
         {
             try
             {
+                var currentDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+
                 // このクラスの何らかのメンバーにアクセスされたら読み込み
                 // 読み込みに失敗したら例外が投げられてプラグインだけが死ぬ（はず）
-                System.Reflection.Assembly.LoadFrom("protobuf-net.dll");
-                System.Reflection.Assembly.LoadFrom("System.Windows.Controls.DataVisualization.Toolkit.dll");
+                var toolkitPath = Path.Combine(currentDir, "System.Windows.Controls.DataVisualization.Toolkit.dll");
+                if (File.Exists(toolkitPath))
+                    Assembly.LoadFrom(toolkitPath);
             }
             catch (Exception ex)
             {
