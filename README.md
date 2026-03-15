@@ -13,8 +13,7 @@
 
 ### インストール
 * KanColleViewer 4.7.0 以降が必要です。
-* "MaterialChartPlugin.dll"をKanColleViewerの"Plugins"ディレクトリに移動してください。
-* "System.Windows.Controls.DataVisualization.Toolkit.dll"をKanColleViewer.exeと同じディレクトリに移動してください。
+* 圧縮ファイルを展開し、PluginsフォルダとDLLファイルをKanColleViewer にコピーしてください。
 
 ### ライセンス
 
