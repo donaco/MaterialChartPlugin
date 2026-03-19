@@ -15,6 +15,10 @@
 * KanColleViewer 4.7.0 以降が必要です。
 * 圧縮ファイルを展開し、PluginsフォルダとDLLファイルをKanColleViewer にコピーしてください。
 
+### 削除方法
+* KanColleViewer を終了し、PluginsフォルダとDLLファイルを削除してください。
+* データの保存先は %LOCALAPPDATA%\terry_u16\MaterialChartPlugin\ になります。必要に応じて削除してください。
+
 ### ライセンス
 
 * [The MIT License (MIT)](LICENSE.txt)
