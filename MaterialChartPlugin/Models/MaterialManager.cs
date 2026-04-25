@@ -27,6 +27,8 @@ namespace MaterialChartPlugin.Models
 
         public int RepairTool => KanColleClient.Current.Homeport.Materials.InstantRepairMaterials;
 
+        public int InstantBuildTool => KanColleClient.Current.Homeport.Materials.InstantBuildMaterials;
+
         /// <summary>
         /// 備蓄可能な資材量の上限を表します。
         /// </summary>
@@ -72,6 +74,7 @@ namespace MaterialChartPlugin.Models
                         { nameof(materials.Steel),  (_,__) => RaisePropertyChanged(nameof(Steel)) },
                         { nameof(materials.Bauxite),  (_,__) => RaisePropertyChanged(nameof(Bauxite)) },
                         { nameof(materials.InstantRepairMaterials),  (_,__) => RaisePropertyChanged(nameof(RepairTool)) },
+                        { nameof(materials.InstantBuildMaterials),  (_,__) => RaisePropertyChanged(nameof(InstantBuildTool)) },
                         { nameof(adomiral.Level), (_, __) => RaisePropertyChanged(nameof(StorableMaterialLimit)) }
                     };
 

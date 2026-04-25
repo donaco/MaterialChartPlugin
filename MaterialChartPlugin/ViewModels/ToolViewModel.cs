@@ -34,6 +34,8 @@ namespace MaterialChartPlugin.ViewModels
 
         public int RepairTool => materialManager.RepairTool;
 
+        public int InstantBuildTool => materialManager.InstantBuildTool;
+
         #region IsPopupMode変更通知プロパティ
         private bool _IsPopupMode;
 
@@ -136,6 +138,7 @@ namespace MaterialChartPlugin.ViewModels
         }
         #endregion
 
+
         #region RepairToolSeries変更通知プロパティ
         private ObservableCollection<ChartPoint> _RepairToolSeries = new ObservableCollection<ChartPoint>();
 
@@ -148,6 +151,23 @@ namespace MaterialChartPlugin.ViewModels
                 if (_RepairToolSeries == value)
                     return;
                 _RepairToolSeries = value;
+                RaisePropertyChanged();
+            }
+        }
+        #endregion
+
+        #region InstantBuildToolSeries変更通知プロパティ
+        private ObservableCollection<ChartPoint> _InstantBuildToolSeries = new ObservableCollection<ChartPoint>();
+
+        public ObservableCollection<ChartPoint> InstantBuildToolSeries
+        {
+            get
+            { return _InstantBuildToolSeries; }
+            set
+            {
+                if (_InstantBuildToolSeries == value)
+                    return;
+                _InstantBuildToolSeries = value;
                 RaisePropertyChanged();
             }
         }
@@ -310,6 +330,7 @@ namespace MaterialChartPlugin.ViewModels
                             { nameof(materialManager.Steel),  (_,__) => RaisePropertyChanged(nameof(Steel)) },
                             { nameof(materialManager.Bauxite),  (_,__) => RaisePropertyChanged(nameof(Bauxite)) },
                             { nameof(materialManager.RepairTool),  (_,__) => RaisePropertyChanged(nameof(RepairTool)) },
+                            { nameof(materialManager.InstantBuildTool),  (_,__) => RaisePropertyChanged(nameof(InstantBuildTool)) },
                             {
                                 // materialManagerの初期化が完了したら、DisplayedPeriodの変更時に更新を行うよう設定
                                 nameof(materialManager.IsAvailable),
@@ -359,7 +380,7 @@ namespace MaterialChartPlugin.ViewModels
         {
             SetXAxis(newData);
             SetMaterialYAxis(Math.Max(this.mostMaterial, newData.MostMaterial));
-            SetRepairToolYAxis(Math.Max(this.mostRepairTool, newData.RepairTool));
+            SetRepairToolYAxis(Math.Max(this.mostRepairTool, Math.Max(newData.RepairTool, newData.InstantBuildTool)));
             AddChartData(newData);
         }
 
@@ -381,7 +402,7 @@ namespace MaterialChartPlugin.ViewModels
 
             SetXAxis(neededData[neededData.Length - 1]);
             SetMaterialYAxis(neededData.Max(p => p.MostMaterial));
-            SetRepairToolYAxis(neededData.Max(p => p.RepairTool));
+            SetRepairToolYAxis(neededData.Max(p => Math.Max(p.RepairTool, p.InstantBuildTool)));
             RefleshChartData(neededData);
         }
 
@@ -395,6 +416,7 @@ namespace MaterialChartPlugin.ViewModels
                     SteelSeries.Add(new ChartPoint(data.DateTime, data.Steel));
                     BauxiteSeries.Add(new ChartPoint(data.DateTime, data.Bauxite));
                     RepairToolSeries.Add(new ChartPoint(data.DateTime, data.RepairTool));
+                    InstantBuildToolSeries.Add(new ChartPoint(data.DateTime, data.InstantBuildTool));
                 });
 
             var currentDateTime = data.DateTime;
@@ -417,6 +439,7 @@ namespace MaterialChartPlugin.ViewModels
             var steels = new ObservableCollection<ChartPoint>();
             var bauxites = new ObservableCollection<ChartPoint>();
             var repairTools = new ObservableCollection<ChartPoint>();
+            var instantBuildTools = new ObservableCollection<ChartPoint>();
             var storableLimit = new ObservableCollection<ChartPoint>();
 
             foreach (var data in neededData)
@@ -426,6 +449,7 @@ namespace MaterialChartPlugin.ViewModels
                 steels.Add(new ChartPoint(data.DateTime, data.Steel));
                 bauxites.Add(new ChartPoint(data.DateTime, data.Bauxite));
                 repairTools.Add(new ChartPoint(data.DateTime, data.RepairTool));
+                instantBuildTools.Add(new ChartPoint(data.DateTime, data.InstantBuildTool));
             }
 
             var currentDateTime = neededData[neededData.Length - 1].DateTime;
@@ -439,6 +463,7 @@ namespace MaterialChartPlugin.ViewModels
             this.SteelSeries = steels;
             this.BauxiteSeries = bauxites;
             this.RepairToolSeries = repairTools;
+            this.InstantBuildToolSeries = instantBuildTools;
             this.StorableLimitSeries = storableLimit;
         }
 

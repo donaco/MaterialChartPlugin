@@ -12,7 +12,6 @@
              xmlns:chartingToolkit="clr-namespace:System.Windows.Controls.DataVisualization.Charting;assembly=System.Windows.Controls.DataVisualization.Toolkit"
              xmlns:visualizationToolkit="clr-namespace:System.Windows.Controls.DataVisualization;assembly=System.Windows.Controls.DataVisualization.Toolkit"
              xmlns:Primitives="clr-namespace:System.Windows.Controls.DataVisualization.Charting.Primitives;assembly=System.Windows.Controls.DataVisualization.Toolkit" x:Class="MaterialChartPlugin.Views.ToolView"
-             xmlns:metro2="http://schemes.grabacr.net/winfx/2015/personal/controls"
     Background="{DynamicResource ThemeBrushKey}"
              Foreground="{DynamicResource ActiveForegroundBrushKey}"
              mc:Ignorable="d" 
@@ -202,10 +201,18 @@
                     <Grid Margin="5,5,20,5" Height="18">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="18"/>
-                            <ColumnDefinition Width="60"/>
+                            <ColumnDefinition Width="40"/>
                         </Grid.ColumnDefinitions>
                         <Path Data="M6.3108872E-30,4.1030015 L3.3666228,25.8279 C9.4233457,29.045308 15.565663,29.127849 21.800335,25.8279 L25.400002,4.1030015 C19.533668,10.736336 5.8247606,10.638561 6.3108872E-30,4.1030015 z M0.53400284,3.1024193 C8.6425927,-0.99357788 16.763303,-0.98370911 24.867,2.8356944 23.730169,4.0349751 22.529176,5.0011815 21.200334,5.5029586 15.308794,3.6684347 9.5866673,3.640014 4.0670011,5.7700066 2.9250013,5.2639936 1.7387949,4.2830441 0.53400284,3.1024193 z M5.1420025,6.415456 C10.511568,8.782226 15.012181,8.6718045 20.241998,6.2154717 14.942829,4.6546567 10.442839,4.7750539 5.1420025,6.415456 z" Fill="#FFA2C08B" Stretch="Uniform"/>
                         <TextBlock TextWrapping="Wrap" Text="{Binding RepairTool}" d:LayoutOverrides="Width, Height" Grid.Column="1" HorizontalAlignment="Right" FontSize="14.667" VerticalAlignment="Center"/>
+                    </Grid>
+                    <Grid Margin="5,5,20,5" Height="18">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="18"/>
+                            <ColumnDefinition Width="40"/>
+                        </Grid.ColumnDefinitions>
+                        <Path Data="M6.3108872E-30,4.1030015 L3.3666228,25.8279 C9.4233457,29.045308 15.565663,29.127849 21.800335,25.8279 L25.400002,4.1030015 C19.533668,10.736336 5.8247606,10.638561 6.3108872E-30,4.1030015 z M0.53400284,3.1024193 C8.6425927,-0.99357788 16.763303,-0.98370911 24.867,2.8356944 23.730169,4.0349751 22.529176,5.0011815 21.200334,5.5029586 15.308794,3.6684347 9.5866673,3.640014 4.0670011,5.7700066 2.9250013,5.2639936 1.7387949,4.2830441 0.53400284,3.1024193 z M5.1420025,6.415456 C10.511568,8.782226 15.012181,8.6718045 20.241998,6.2154717 14.942829,4.6546567 10.442839,4.7750539 5.1420025,6.415456 z" Fill="#FFA2C08B" Stretch="Uniform"/>
+                        <TextBlock TextWrapping="Wrap" Text="{Binding InstantBuildTool}" d:LayoutOverrides="Width, Height" Grid.Column="1" HorizontalAlignment="Right" FontSize="14.667" VerticalAlignment="Center"/>
                     </Grid>
                 </WrapPanel>
             </Border>
@@ -254,16 +261,17 @@
                     <chartingToolkit:LinearAxis Orientation="Y" Minimum="0" Maximum="{Binding YMax2}" MajorTickMarkStyle="{DynamicResource MajorTickStyle}" Location="Left" GridLineStyle="{DynamicResource GridLineStyle}" ShowGridLines="True" MinWidth="40"/>
                 </chartingToolkit:Chart.Axes>
                 <chartingToolkit:AreaSeries DependentValuePath="Y" IndependentValuePath="X" ItemsSource="{Binding RepairToolSeries}" Title="高速修復材" Style="{DynamicResource SimpleAreaSeriesStyle}" BorderBrush="#FFA2C08B"/>
+                <chartingToolkit:AreaSeries DependentValuePath="Y" IndependentValuePath="X" ItemsSource="{Binding InstantBuildToolSeries}" Title="高速建造材" Style="{DynamicResource SimpleAreaSeriesStyle}" BorderBrush="#FFC7844D"/>
             </chartingToolkit:Chart>
             <Border BorderBrush="{DynamicResource BorderBrushKey}" BorderThickness="0,0,0,1" Margin="0,20,0,10" />
             <WrapPanel Margin="10,0,10,10">
                 <!-- ポップアップボタン（ポップアップ内では非表示） -->
-                <metro2:CallMethodButton Content="別ウィンドウで表示"
-													 MethodName="OpenPopupWindow"
-													 HorizontalAlignment="Stretch"
-													 Margin="0,5,5,5"
-                                                     Height="35" 
-													 Visibility="{Binding IsPopupMode, Converter={StaticResource InverseBoolToVisibilityConverter}}" />
+                <controls:CallMethodButton Content="別ウィンドウで表示"
+                           MethodName="OpenPopupWindow"
+                           HorizontalAlignment="Stretch"
+                           Margin="0,5,5,5"
+                           Height="35"
+                           Visibility="{Binding IsPopupMode, Converter={StaticResource InverseBoolToVisibilityConverter}}" />
                 <controls:CallMethodButton Content="バックアップデータのインポート" MethodName="ImportMaterialData" Width="180" HorizontalAlignment="Left" VerticalAlignment="Center" Height="35" Margin="0,5,5,5"/>
                 <controls:CallMethodButton Content="バックアップデータのエクスポート" MethodName="ExportMaterialData" Width="180" HorizontalAlignment="Left" VerticalAlignment="Center" Height="35" Margin="0,5,5,5"/>
                 <controls:CallMethodButton Content=".csv形式でエクスポート" MethodName="ExportAsCsv" Width="180" HorizontalAlignment="Left" VerticalAlignment="Center" Height="35" Margin="0,5,5,5"/>

@@ -93,7 +93,9 @@ namespace MaterialChartPlugin.Models.Utilities
                 || Math.Abs(newData.Ammunition - oldData.Ammunition) >= oldData.Fuel * minimumMaterialRatio
                 || Math.Abs(newData.Steel - oldData.Steel) >= oldData.Steel * minimumMaterialRatio
                 || Math.Abs(newData.Bauxite - oldData.Bauxite) >= oldData.Bauxite * minimumMaterialRatio
-                || Math.Abs(newData.RepairTool - oldData.RepairTool) >= oldData.RepairTool * minimumMaterialRatio;
+                || Math.Abs(newData.RepairTool - oldData.RepairTool) >= oldData.RepairTool * minimumMaterialRatio
+                || Math.Abs(newData.InstantBuildTool - oldData.InstantBuildTool) >= oldData.InstantBuildTool * minimumMaterialRatio;
+
         }
 
         /// <summary>
