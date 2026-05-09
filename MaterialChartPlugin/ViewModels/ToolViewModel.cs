@@ -501,7 +501,18 @@ namespace MaterialChartPlugin.ViewModels
 
         public async void ExportAsCsv()
         {
-            await materialManager.Log.ExportAsCsvAsync();
+            var fileDialog = new SaveFileDialog()
+            {
+                Filter = "CSVファイル(*.csv)|*.csv|すべてのファイル(*.*)|*.*",
+                FilterIndex = 1,
+                Title = "エクスポート先の選択",
+                FileName = $"MaterialChartPlugin-{DateTime.Now:yyMMdd-HHmmssff}.csv",
+            };
+
+            if (fileDialog.ShowDialog() == true)
+            {
+                await materialManager.Log.ExportAsCsvAsync(fileDialog.FileName);
+            }
         }
 
         public async void ImportMaterialData()
@@ -525,7 +536,18 @@ namespace MaterialChartPlugin.ViewModels
 
         public async void ExportMaterialData()
         {
-            await materialManager.Log.ExportAsync();
+            var fileDialog = new SaveFileDialog()
+            {
+                Filter = "データファイル(*.dat)|*.dat|すべてのファイル(*.*)|*.*",
+                FilterIndex = 1,
+                Title = "エクスポート先の選択",
+                FileName = $"MaterialChartPlugin-BackUp-{DateTime.Now:yyMMdd-HHmmssff}.dat",
+            };
+
+            if (fileDialog.ShowDialog() == true)
+            {
+                await materialManager.Log.ExportAsync(fileDialog.FileName);
+            }
         }
 
         protected override void Dispose(bool disposing)

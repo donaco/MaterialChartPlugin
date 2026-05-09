@@ -198,6 +198,45 @@ namespace MaterialChartPlugin.Models
             }
         }
 
+        public async Task ExportAsCsvAsync(string filePath)
+        {
+            try
+            {
+                var directory = Path.GetDirectoryName(filePath);
+                if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
+                {
+                    Directory.CreateDirectory(directory);
+                }
+
+                using (var writer = new StreamWriter(filePath, false, Encoding.UTF8))
+                {
+                    await writer.WriteLineAsync("時刻,燃料,弾薬,鋼材,ボーキサイト,高速修復材,開発資材,高速建造材,改修資材");
+
+                    foreach (var pair in History)
+                    {
+                        await writer.WriteLineAsync($"{pair.DateTime},{pair.Fuel},{pair.Ammunition},{pair.Steel},{pair.Bauxite},{pair.RepairTool},{pair.DevelopmentTool},{pair.InstantBuildTool},{pair.ImprovementTool}");
+                    }
+                }
+
+                plugin.InvokeNotifyRequested(new Grabacr07.KanColleViewer.Composition.NotifyEventArgs(
+                    "MaterialChartPlugin.CsvExportCompleted", "エクスポート完了",
+                    $"資材データがエクスポートされました: {filePath}")
+                {
+                    Activated = () =>
+                    {
+                        System.Diagnostics.Process.Start("EXPLORER.EXE", $"/select,\"\"{filePath}\"\"");
+                    }
+                });
+            }
+            catch (IOException ex)
+            {
+                plugin.InvokeNotifyRequested(new Grabacr07.KanColleViewer.Composition.NotifyEventArgs(
+                    "MaterialChartPlugin.ExportFailed", "エクスポート失敗",
+                    "資材データのエクスポートに失敗しました。必要なアクセス権限がない可能性があります。"));
+                System.Diagnostics.Debug.WriteLine(ex);
+            }
+        }
+
         public async Task ImportAsync(string filePath)
         {
             await LoadAsync(filePath, async () =>
@@ -216,12 +255,12 @@ namespace MaterialChartPlugin.Models
             );
         }
 
-        public async Task ExportAsync()
+        public async Task ExportAsync(string filePath)
         {
-            var fileName = CreateExportedFileName(DateTime.Now);
-            var filePath = Path.Combine(ExportDirectoryPath, fileName);
-            await SaveAsync(ExportDirectoryPath, filePath, () =>
-                plugin.InvokeNotifyRequested(new Grabacr07.KanColleViewer.Composition.NotifyEventArgs(
+            await SaveAsync(
+                Path.GetDirectoryName(filePath) ?? "",
+                filePath,
+                () => plugin.InvokeNotifyRequested(new Grabacr07.KanColleViewer.Composition.NotifyEventArgs(
                     "MaterialChartPlugin.ExportComplete", "エクスポート完了",
                     $"資材データがエクスポートされました: {filePath}")
                 {
