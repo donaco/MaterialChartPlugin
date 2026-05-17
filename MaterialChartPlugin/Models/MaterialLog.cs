@@ -12,7 +12,7 @@ using Grabacr07.KanColleWrapper;
 
 namespace MaterialChartPlugin.Models
 {
-    public class MaterialLog : NotificationObject
+    public class MaterialLog : NotificationObject, IDisposable
     {
         static readonly string localDirectoryPath = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
@@ -371,6 +371,11 @@ namespace MaterialChartPlugin.Models
             }
 
             return fullPath;
+        }
+
+        public void Dispose()
+        {
+            History?.Clear();
         }
     }
 }

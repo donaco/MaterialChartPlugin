@@ -57,13 +57,15 @@ namespace MaterialChartPlugin.Models
 
         private IDisposable _loggingSubscription;
 
+        private IDisposable _isStartedSubscription;
+
         public MaterialManager(MaterialChartPlugin plugin)
         {
             this.plugin = plugin;
 
             this.Log = new MaterialLog(plugin);
 
-            KanColleClient.Current
+            _isStartedSubscription = KanColleClient.Current
                 // KanColleClientのIsStartedがtrueに変更されたら資材データの購読を開始
                 .Subscribe(nameof(KanColleClient.IsStarted), () =>
                 {
@@ -127,8 +129,10 @@ namespace MaterialChartPlugin.Models
 
         public void Dispose()
         {
+            _isStartedSubscription?.Dispose();
             _loggingSubscription?.Dispose();
             listener?.Dispose();
+            Log?.Dispose();
         }
     }
 }

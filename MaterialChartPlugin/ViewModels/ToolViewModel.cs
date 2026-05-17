@@ -377,7 +377,13 @@ namespace MaterialChartPlugin.ViewModels
                 DataContext = this,
             };
             IsPopupMode = true;
-            window.Closed += (s, e) => IsPopupMode = false;
+            EventHandler onClosed = null;
+            onClosed = (s, e) =>
+            {
+                IsPopupMode = false;
+                window.Closed -= onClosed;
+            };
+            window.Closed += onClosed;
             window.Show();
         }
 
