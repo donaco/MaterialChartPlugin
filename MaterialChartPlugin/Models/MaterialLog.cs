@@ -185,7 +185,7 @@ namespace MaterialChartPlugin.Models
                 {
                     Activated = () =>
                     {
-                        System.Diagnostics.Process.Start("EXPLORER.EXE", $"/select,\"\"{csvFilePath}\"\"");
+                        OpenFolderAndSelectFile(csvFilePath);
                     }
                 });
             }
@@ -227,7 +227,7 @@ namespace MaterialChartPlugin.Models
                 {
                     Activated = () =>
                     {
-                        System.Diagnostics.Process.Start("EXPLORER.EXE", $"/select,\"\"{filePath}\"\"");
+                        OpenFolderAndSelectFile(filePath);
                     }
                 });
             }
@@ -281,7 +281,7 @@ namespace MaterialChartPlugin.Models
                     {
                         Activated = () =>
                         {
-                            System.Diagnostics.Process.Start("EXPLORER.EXE", $"/select,\"\"{filePath}\"\"");
+                            OpenFolderAndSelectFile(filePath);
                         }
                     })
                 );
@@ -293,6 +293,23 @@ namespace MaterialChartPlugin.Models
                     $"無効なファイルパスが指定されました: {ex.Message}"));
                 System.Diagnostics.Debug.WriteLine(ex);
             }
+        }
+
+        /// <summary>
+        /// エクスプローラーで指定ファイルを選択した状態で開きます。
+        /// パスに含まれる引用符を除去してから引数に渡すことで引数インジェクションを防ぎます。
+        /// </summary>
+        private static void OpenFolderAndSelectFile(string filePath)
+        {
+            // Windows のパス仕様上 " は使用不可だが、念のため除去する
+            var safePath = filePath.Replace("\"", "");
+            var startInfo = new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = "EXPLORER.EXE",
+                Arguments = $"/select,\"{safePath}\"",
+                UseShellExecute = true,
+            };
+            System.Diagnostics.Process.Start(startInfo);
         }
 
         private string CreateCsvFileName(DateTime dateTime)
