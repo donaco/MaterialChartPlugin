@@ -13,7 +13,7 @@ using MetroTrilithon.Mvvm;
 
 namespace MaterialChartPlugin.Models
 {
-    public class MaterialManager : NotificationObject
+    public class MaterialManager : NotificationObject, IDisposable
     {
         private MaterialChartPlugin plugin;
 
@@ -55,6 +55,8 @@ namespace MaterialChartPlugin.Models
 
         PropertyChangedEventListener listener;
 
+        private IDisposable _loggingSubscription;
+
         public MaterialManager(MaterialChartPlugin plugin)
         {
             this.plugin = plugin;
@@ -79,7 +81,8 @@ namespace MaterialChartPlugin.Models
                     };
 
                     // 資材のロギング
-                    Observable.FromEvent<PropertyChangedEventHandler, PropertyChangedEventArgs>(
+                    _loggingSubscription?.Dispose();
+                    _loggingSubscription = Observable.FromEvent<PropertyChangedEventHandler, PropertyChangedEventArgs>(
                         h => (sender, e) => h(e),
                         h => materials.PropertyChanged += h,
                         h => materials.PropertyChanged -= h)
@@ -119,6 +122,12 @@ namespace MaterialChartPlugin.Models
         public async Task Initialize()
         {
             await Log.LoadAsync();
+        }
+
+        public void Dispose()
+        {
+            _loggingSubscription?.Dispose();
+            listener?.Dispose();
         }
     }
 }
