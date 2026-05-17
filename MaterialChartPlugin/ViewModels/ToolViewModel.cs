@@ -303,7 +303,7 @@ namespace MaterialChartPlugin.ViewModels
             }
         }
 
-        public async void Initialize()
+        public async Task InitializeAsync()
         {
             try
             {
@@ -363,7 +363,7 @@ namespace MaterialChartPlugin.ViewModels
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"ToolViewModel Initialize failed: {ex}");
-                throw;
+                throw; // Taskに例外を乗せて呼び元に伝播する
             }
         }
 

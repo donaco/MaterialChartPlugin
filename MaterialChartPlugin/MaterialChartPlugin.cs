@@ -60,7 +60,11 @@ namespace MaterialChartPlugin
 
         public void Initialize()
         {
-            viewModel.Initialize();
+            viewModel.InitializeAsync().ContinueWith(t =>
+            {
+                if (t.IsFaulted)
+                    System.Diagnostics.Debug.WriteLine($"MaterialChartPlugin Initialize failed: {t.Exception}");
+            }, TaskScheduler.Default);
         }
 
     }
