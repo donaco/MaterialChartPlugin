@@ -18,7 +18,9 @@ namespace MaterialChartPlugin.Models
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "terry_u16", "MaterialChartPlugin");
 
-        public static readonly string ExportDirectoryPath = "MaterialChartPlugin";
+        public static readonly string ExportDirectoryPath = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+            "MaterialChartPlugin");
 
         static readonly string saveFileName = "materiallog.dat";
 
@@ -291,6 +293,13 @@ namespace MaterialChartPlugin.Models
                 plugin.InvokeNotifyRequested(new Grabacr07.KanColleViewer.Composition.NotifyEventArgs(
                     "MaterialChartPlugin.ExportFailed", "エクスポート失敗",
                     $"無効なファイルパスが指定されました: {ex.Message}"));
+                System.Diagnostics.Debug.WriteLine(ex);
+            }
+            catch (IOException ex)
+            {
+                plugin.InvokeNotifyRequested(new Grabacr07.KanColleViewer.Composition.NotifyEventArgs(
+                    "MaterialChartPlugin.ExportFailed", "エクスポート失敗",
+                    "資材データのエクスポートに失敗しました。必要なアクセス権限がない可能性があります。"));
                 System.Diagnostics.Debug.WriteLine(ex);
             }
         }
