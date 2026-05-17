@@ -69,6 +69,7 @@ namespace MaterialChartPlugin.Models
                 {
                     var materials = KanColleClient.Current.Homeport.Materials;
                     var adomiral = KanColleClient.Current.Homeport.Admiral;
+                    listener?.Dispose();
                     listener = new PropertyChangedEventListener(materials)
                     {
                         { nameof(materials.Fuel),  (_,__) => RaisePropertyChanged(nameof(Fuel)) },

@@ -345,7 +345,6 @@ namespace MaterialChartPlugin.ViewModels
                                         RefleshData();
                                         RaisePropertyChanged(nameof(DisplayedPeriod));
                                     });
-                                    disposables.Add(_displayedPeriodSubscription);
                                 }
                             }
                         };
@@ -444,30 +443,33 @@ namespace MaterialChartPlugin.ViewModels
         /// <param name="neededData"></param>
         private void RefleshChartData(TimeMaterialsPair[] neededData)
         {
-            FuelSeries.Clear();
-            AmmunitionSeries.Clear();
-            SteelSeries.Clear();
-            BauxiteSeries.Clear();
-            RepairToolSeries.Clear();
-            InstantBuildToolSeries.Clear();
-
-            foreach (var data in neededData)
+            Application.Current.Dispatcher.Invoke(() =>
             {
-                FuelSeries.Add(new ChartPoint(data.DateTime, data.Fuel));
-                AmmunitionSeries.Add(new ChartPoint(data.DateTime, data.Ammunition));
-                SteelSeries.Add(new ChartPoint(data.DateTime, data.Steel));
-                BauxiteSeries.Add(new ChartPoint(data.DateTime, data.Bauxite));
-                RepairToolSeries.Add(new ChartPoint(data.DateTime, data.RepairTool));
-                InstantBuildToolSeries.Add(new ChartPoint(data.DateTime, data.InstantBuildTool));
-            }
+                FuelSeries.Clear();
+                AmmunitionSeries.Clear();
+                SteelSeries.Clear();
+                BauxiteSeries.Clear();
+                RepairToolSeries.Clear();
+                InstantBuildToolSeries.Clear();
 
-            var currentDateTime = neededData[neededData.Length - 1].DateTime;
+                foreach (var data in neededData)
+                {
+                    FuelSeries.Add(new ChartPoint(data.DateTime, data.Fuel));
+                    AmmunitionSeries.Add(new ChartPoint(data.DateTime, data.Ammunition));
+                    SteelSeries.Add(new ChartPoint(data.DateTime, data.Steel));
+                    BauxiteSeries.Add(new ChartPoint(data.DateTime, data.Bauxite));
+                    RepairToolSeries.Add(new ChartPoint(data.DateTime, data.RepairTool));
+                    InstantBuildToolSeries.Add(new ChartPoint(data.DateTime, data.InstantBuildTool));
+                }
 
-            var storableLimit = new ObservableCollection<ChartPoint>();
-            storableLimit.Add(new ChartPoint(currentDateTime - ChartSettings.DisplayedPeriod.Value.ToTimeSpan(),
-                materialManager.StorableMaterialLimit));
-            storableLimit.Add(new ChartPoint(currentDateTime, materialManager.StorableMaterialLimit));
-            this.StorableLimitSeries = storableLimit;
+                var currentDateTime = neededData[neededData.Length - 1].DateTime;
+
+                var storableLimit = new ObservableCollection<ChartPoint>();
+                storableLimit.Add(new ChartPoint(currentDateTime - ChartSettings.DisplayedPeriod.Value.ToTimeSpan(),
+                    materialManager.StorableMaterialLimit));
+                storableLimit.Add(new ChartPoint(currentDateTime, materialManager.StorableMaterialLimit));
+                this.StorableLimitSeries = storableLimit;
+            });
         }
 
         /// <summary>
@@ -557,6 +559,7 @@ namespace MaterialChartPlugin.ViewModels
         {
             if (disposing)
             {
+                _displayedPeriodSubscription?.Dispose();
                 disposables.Dispose();
             }
             base.Dispose(disposing);
