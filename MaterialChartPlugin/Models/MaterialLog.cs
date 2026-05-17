@@ -30,6 +30,8 @@ namespace MaterialChartPlugin.Models
 
         private readonly object _saveLock = new object();
 
+        private bool _isDisposed = false;
+
         private static readonly DataContractSerializer serializer =
             new DataContractSerializer(typeof(List<TimeMaterialsPair>));
 
@@ -375,6 +377,11 @@ namespace MaterialChartPlugin.Models
 
         public void Dispose()
         {
+            if (_isDisposed) return;
+            _isDisposed = true;
+
+            // Dispose後にバックグラウンドからSaveAsync/History.Addが呼ばれないようにガード
+            HasLoaded = false;
             History?.Clear();
         }
     }

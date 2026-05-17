@@ -129,10 +129,12 @@ namespace MaterialChartPlugin.Models
 
         public void Dispose()
         {
+            // 先にLogをDisposeしてHasLoaded=falseにすることで、
+            // Throttle残留中のロギングコールバックからのデータ書き込み・保存を防ぐ
+            Log?.Dispose();
             _isStartedSubscription?.Dispose();
             _loggingSubscription?.Dispose();
             listener?.Dispose();
-            Log?.Dispose();
         }
     }
 }
