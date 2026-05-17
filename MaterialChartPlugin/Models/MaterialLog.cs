@@ -202,6 +202,9 @@ namespace MaterialChartPlugin.Models
         {
             try
             {
+                var resolvedPath = ResolveAndValidatePath(filePath);
+                filePath = resolvedPath;
+
                 var directory = Path.GetDirectoryName(filePath);
                 if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
                 {
@@ -227,6 +230,13 @@ namespace MaterialChartPlugin.Models
                         System.Diagnostics.Process.Start("EXPLORER.EXE", $"/select,\"\"{filePath}\"\"");
                     }
                 });
+            }
+            catch (ArgumentException ex)
+            {
+                plugin.InvokeNotifyRequested(new Grabacr07.KanColleViewer.Composition.NotifyEventArgs(
+                    "MaterialChartPlugin.ExportFailed", "エクスポート失敗",
+                    $"無効なファイルパスが指定されました: {ex.Message}"));
+                System.Diagnostics.Debug.WriteLine(ex);
             }
             catch (IOException ex)
             {
@@ -257,19 +267,32 @@ namespace MaterialChartPlugin.Models
 
         public async Task ExportAsync(string filePath)
         {
-            await SaveAsync(
-                Path.GetDirectoryName(filePath) ?? "",
-                filePath,
-                () => plugin.InvokeNotifyRequested(new Grabacr07.KanColleViewer.Composition.NotifyEventArgs(
-                    "MaterialChartPlugin.ExportComplete", "エクスポート完了",
-                    $"資材データがエクスポートされました: {filePath}")
-                {
-                    Activated = () =>
+            try
+            {
+                var resolvedPath = ResolveAndValidatePath(filePath);
+                filePath = resolvedPath;
+
+                await SaveAsync(
+                    Path.GetDirectoryName(filePath) ?? "",
+                    filePath,
+                    () => plugin.InvokeNotifyRequested(new Grabacr07.KanColleViewer.Composition.NotifyEventArgs(
+                        "MaterialChartPlugin.ExportComplete", "エクスポート完了",
+                        $"資材データがエクスポートされました: {filePath}")
                     {
-                        System.Diagnostics.Process.Start("EXPLORER.EXE", $"/select,\"\"{filePath}\"\"");
-                    }
-                })
-            );
+                        Activated = () =>
+                        {
+                            System.Diagnostics.Process.Start("EXPLORER.EXE", $"/select,\"\"{filePath}\"\"");
+                        }
+                    })
+                );
+            }
+            catch (ArgumentException ex)
+            {
+                plugin.InvokeNotifyRequested(new Grabacr07.KanColleViewer.Composition.NotifyEventArgs(
+                    "MaterialChartPlugin.ExportFailed", "エクスポート失敗",
+                    $"無効なファイルパスが指定されました: {ex.Message}"));
+                System.Diagnostics.Debug.WriteLine(ex);
+            }
         }
 
         private string CreateCsvFileName(DateTime dateTime)
@@ -280,6 +303,48 @@ namespace MaterialChartPlugin.Models
         private string CreateExportedFileName(DateTime dateTime)
         {
             return $"MaterialChartPlugin-BackUp-{dateTime.ToString("yyMMdd-HHmmssff")}.dat";
+        }
+
+        /// <summary>
+        /// 指定されたファイルパスを正規化し、危険な書き込み先でないことを検証します。
+        /// </summary>
+        /// <param name="filePath">検証するファイルパス</param>
+        /// <returns>正規化済みの絶対パス</returns>
+        /// <exception cref="ArgumentException">パスが無効または危険な書き込み先の場合</exception>
+        private static string ResolveAndValidatePath(string filePath)
+        {
+            if (string.IsNullOrWhiteSpace(filePath))
+                throw new ArgumentException("ファイルパスが空です。", nameof(filePath));
+
+            // Path.GetFullPath で ../../../ 等のトラバーサルを解決する
+            string fullPath;
+            try
+            {
+                fullPath = Path.GetFullPath(filePath);
+            }
+            catch (Exception ex)
+            {
+                throw new ArgumentException($"ファイルパスが無効です: {filePath}", nameof(filePath), ex);
+            }
+
+            // Windows の特殊フォルダ（System32 等）への書き込みを拒否する
+            var blockedRoots = new[]
+            {
+                Environment.GetFolderPath(Environment.SpecialFolder.Windows),
+                Environment.GetFolderPath(Environment.SpecialFolder.System),
+                Environment.GetFolderPath(Environment.SpecialFolder.SystemX86),
+            };
+
+            foreach (var blocked in blockedRoots)
+            {
+                if (!string.IsNullOrEmpty(blocked) &&
+                    fullPath.StartsWith(blocked, StringComparison.OrdinalIgnoreCase))
+                {
+                    throw new ArgumentException($"このフォルダへの書き込みは許可されていません: {fullPath}", nameof(filePath));
+                }
+            }
+
+            return fullPath;
         }
     }
 }
