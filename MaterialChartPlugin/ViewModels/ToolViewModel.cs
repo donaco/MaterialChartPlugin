@@ -268,6 +268,8 @@ namespace MaterialChartPlugin.ViewModels
 
         private readonly CompositeDisposable disposables = new CompositeDisposable();
 
+        private IDisposable _displayedPeriodSubscription;
+
         PropertyChangedEventListener managerChangedListener;
 
         PropertyChangedEventListener logChangedListener;
@@ -321,6 +323,7 @@ namespace MaterialChartPlugin.ViewModels
                             }
                         }
                     };
+                disposables.Add(logChangedListener);
 
                 // 資材データの通知設定
                 managerChangedListener = new PropertyChangedEventListener(materialManager)
@@ -334,13 +337,20 @@ namespace MaterialChartPlugin.ViewModels
                             {
                                 // materialManagerの初期化が完了したら、DisplayedPeriodの変更時に更新を行うよう設定
                                 nameof(materialManager.IsAvailable),
-                                (_,__) => disposables.Add(ChartSettings.DisplayedPeriod.Subscribe(___ =>
+                                (_,__) =>
+                                {
+                                    _displayedPeriodSubscription?.Dispose();
+                                    _displayedPeriodSubscription = ChartSettings.DisplayedPeriod.Subscribe(___ =>
                                     {
                                         RefleshData();
                                         RaisePropertyChanged(nameof(DisplayedPeriod));
-                                    }))
+                                    });
+                                    disposables.Add(_displayedPeriodSubscription);
+                                }
                             }
                         };
+                disposables.Add(managerChangedListener);
+                disposables.Add(materialManager);
 
                 // データ更新設定
                 disposables.Add(Observable.FromEvent<NotifyCollectionChangedEventHandler, NotifyCollectionChangedEventArgs>
@@ -434,36 +444,29 @@ namespace MaterialChartPlugin.ViewModels
         /// <param name="neededData"></param>
         private void RefleshChartData(TimeMaterialsPair[] neededData)
         {
-            var fuels = new ObservableCollection<ChartPoint>();
-            var ammunitions = new ObservableCollection<ChartPoint>();
-            var steels = new ObservableCollection<ChartPoint>();
-            var bauxites = new ObservableCollection<ChartPoint>();
-            var repairTools = new ObservableCollection<ChartPoint>();
-            var instantBuildTools = new ObservableCollection<ChartPoint>();
-            var storableLimit = new ObservableCollection<ChartPoint>();
+            FuelSeries.Clear();
+            AmmunitionSeries.Clear();
+            SteelSeries.Clear();
+            BauxiteSeries.Clear();
+            RepairToolSeries.Clear();
+            InstantBuildToolSeries.Clear();
 
             foreach (var data in neededData)
             {
-                fuels.Add(new ChartPoint(data.DateTime, data.Fuel));
-                ammunitions.Add(new ChartPoint(data.DateTime, data.Ammunition));
-                steels.Add(new ChartPoint(data.DateTime, data.Steel));
-                bauxites.Add(new ChartPoint(data.DateTime, data.Bauxite));
-                repairTools.Add(new ChartPoint(data.DateTime, data.RepairTool));
-                instantBuildTools.Add(new ChartPoint(data.DateTime, data.InstantBuildTool));
+                FuelSeries.Add(new ChartPoint(data.DateTime, data.Fuel));
+                AmmunitionSeries.Add(new ChartPoint(data.DateTime, data.Ammunition));
+                SteelSeries.Add(new ChartPoint(data.DateTime, data.Steel));
+                BauxiteSeries.Add(new ChartPoint(data.DateTime, data.Bauxite));
+                RepairToolSeries.Add(new ChartPoint(data.DateTime, data.RepairTool));
+                InstantBuildToolSeries.Add(new ChartPoint(data.DateTime, data.InstantBuildTool));
             }
 
             var currentDateTime = neededData[neededData.Length - 1].DateTime;
 
+            var storableLimit = new ObservableCollection<ChartPoint>();
             storableLimit.Add(new ChartPoint(currentDateTime - ChartSettings.DisplayedPeriod.Value.ToTimeSpan(),
                 materialManager.StorableMaterialLimit));
             storableLimit.Add(new ChartPoint(currentDateTime, materialManager.StorableMaterialLimit));
-
-            this.FuelSeries = fuels;
-            this.AmmunitionSeries = ammunitions;
-            this.SteelSeries = steels;
-            this.BauxiteSeries = bauxites;
-            this.RepairToolSeries = repairTools;
-            this.InstantBuildToolSeries = instantBuildTools;
             this.StorableLimitSeries = storableLimit;
         }
 
