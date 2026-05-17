@@ -343,11 +343,11 @@ namespace MaterialChartPlugin.ViewModels
                         };
 
                 // データ更新設定
-                Observable.FromEvent<NotifyCollectionChangedEventHandler, NotifyCollectionChangedEventArgs>
+                disposables.Add(Observable.FromEvent<NotifyCollectionChangedEventHandler, NotifyCollectionChangedEventArgs>
                     (h => (sender, e) => h(e), h => history.CollectionChanged += h, h => history.CollectionChanged -= h)
                     .Where(_ => materialManager.Log.HasLoaded)
                     .Throttle(TimeSpan.FromMilliseconds(10))
-                    .Subscribe(_ => UpdateData(history.Last()));
+                    .Subscribe(_ => UpdateData(history.Last())));
                     
                 System.Diagnostics.Debug.WriteLine("ToolViewModel: Initialize completed");
             }
