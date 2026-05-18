@@ -54,10 +54,14 @@
 
 * **ライセンス :** zlib/libpng
 
-#### [Rx (Reactive Extensions)](https://rx.codeplex.com/)
+#### [System.Reactive (Reactive Extensions for .NET)](https://github.com/dotnet/reactive)
 
-* **ライセンス :** Apache License Version 2.0
-* **ライセンス全文 :** [licenses/ApacheLicense2.0.txt](licenses/ApacheLicense2.0.txt)
+> The MIT License (MIT)
+> 
+> Copyright (c) .NET Foundation and Contributors
+
+* **ライセンス :** The MIT License (MIT)
+* **ライセンス全文 :** [licenses/SystemReactive.txt](licenses/SystemReactive.txt)
 
 #### [Silverlight/WPF Data Visualization](http://dlaa.me/blog/post/9999344)
 
