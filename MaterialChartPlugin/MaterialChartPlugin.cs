@@ -1,4 +1,4 @@
-﻿using Grabacr07.KanColleViewer.Composition;
+using Grabacr07.KanColleViewer.Composition;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
@@ -17,7 +17,7 @@ namespace MaterialChartPlugin
     [ExportMetadata("Guid", "56B66906-608A-4BCC-9FE2-6B3B0093F377")]
     [ExportMetadata("Title", "MaterialChart")]
     [ExportMetadata("Description", "資材の推移をグラフで表示します。")]
-    [ExportMetadata("Version", "2.1.2")]
+    [ExportMetadata("Version", "2.2.0")]
     [ExportMetadata("Author", "@terry_u16")]
     [Export(typeof(ITool))]
     [Export(typeof(IRequestNotify))]
