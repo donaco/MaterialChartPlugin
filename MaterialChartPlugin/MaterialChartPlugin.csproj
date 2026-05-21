@@ -56,9 +56,6 @@
     <Reference Include="KanColleViewer.PluginAnalyzer, Version=1.1.1.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\KanColleViewer.PluginAnalyzer.1.1.1.0\lib\net46\KanColleViewer.PluginAnalyzer.dll</HintPath>
     </Reference>
-    <Reference Include="KanColleWrapper, Version=1.6.2.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\KanColleWrapper.1.6.2\lib\net46\KanColleWrapper.dll</HintPath>
-    </Reference>
     <Reference Include="Livet, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b0b1d3f711ef38cb, processorArchitecture=MSIL">
       <HintPath>..\packages\LivetCask.4.0.2\lib\net452\Livet.dll</HintPath>
     </Reference>
@@ -128,8 +125,8 @@
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
-    <Reference Include="System.Reactive, Version=6.0.0.0, Culture=neutral, PublicKeyToken=94bc3704cddfc263, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Reactive.6.0.1\lib\net472\System.Reactive.dll</HintPath>
+    <Reference Include="System.Reactive, Version=6.1.0.0, Culture=neutral, PublicKeyToken=94bc3704cddfc263, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Reactive.6.1.0\lib\net472\System.Reactive.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -206,7 +203,9 @@
     <AppDesigner Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="References\System.Windows.Controls.DataVisualization.Toolkit.dll" />
+    <Content Include="References\System.Windows.Controls.DataVisualization.Toolkit.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Analyzer Include="$(SolutionDir)\Analyzers\KanColleViewer.PluginAnalyzer\bin\$(Configuration)\KanColleViewer.Composition.dll" />
@@ -233,8 +232,7 @@
       <Project>{0AF0B9FF-D981-4D0F-A41F-C3AB6FE2F16D}</Project>
       <Name>MetroRadiance</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\MetroTrilithon\source\MetroTrilithon\MetroTrilithon.csproj">
-      <Project>{cccccccc-cccc-cccc-cccc-cccccccccccc}</Project>
+    <ProjectReference Include="..\..\..\MetroTrilithon\source\MetroTrilithon\MetroTrilithon.csproj">
       <Name>MetroTrilithon</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\..\MetroTrilithon\source\MetroTrilithon.Desktop\MetroTrilithon.Desktop.csproj">
@@ -242,11 +240,24 @@
       <Name>MetroTrilithon.Desktop</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Grabacr07.KanColleWrapper\KanColleWrapper.csproj">
+      <Project>{2757D49B-3A17-4930-A38C-56FC18048609}</Project>
+      <Name>KanColleWrapper</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>mkdir "$(SolutionDir)Grabacr07.KanColleViewer\bin\$(ConfigurationName)\Plugins"
-xcopy /Y "$(TargetDir)*.*" "$(SolutionDir)Grabacr07.KanColleViewer\bin\$(ConfigurationName)"
-move "$(SolutionDir)Grabacr07.KanColleViewer\bin\$(ConfigurationName)\$(TargetName).*" "$(SolutionDir)Grabacr07.KanColleViewer\bin\$(ConfigurationName)\Plugins"</PostBuildEvent>
+    <PostBuildEvent>mkdir "$(SolutionDir)Grabacr07.KanColleViewer\bin\$(ConfigurationName)\Plugins" 2&gt;nul
+xcopy /Y "$(TargetPath)" "$(SolutionDir)Grabacr07.KanColleViewer\bin\$(ConfigurationName)\Plugins\"
+mkdir "$(SolutionDir)Grabacr07.KanColleViewer\bin\x64\$(ConfigurationName)\Plugins" 2&gt;nul
+xcopy /Y "$(TargetPath)" "$(SolutionDir)Grabacr07.KanColleViewer\bin\x64\$(ConfigurationName)\Plugins\"
+xcopy /Y "$(TargetDir)MetroTrilithon.Desktop.dll" "$(SolutionDir)Grabacr07.KanColleViewer\bin\$(ConfigurationName)\Plugins\"
+xcopy /Y "$(TargetDir)MetroTrilithon.Desktop.dll" "$(SolutionDir)Grabacr07.KanColleViewer\bin\x64\$(ConfigurationName)\Plugins\"
+xcopy /Y "$(TargetDir)MetroTrilithon.dll" "$(SolutionDir)Grabacr07.KanColleViewer\bin\$(ConfigurationName)\Plugins\"
+xcopy /Y "$(TargetDir)MetroTrilithon.dll" "$(SolutionDir)Grabacr07.KanColleViewer\bin\x64\$(ConfigurationName)\Plugins\"
+xcopy /Y "$(TargetDir)System.Windows.Controls.DataVisualization.Toolkit.dll" "$(SolutionDir)Grabacr07.KanColleViewer\bin\$(ConfigurationName)\"
+xcopy /Y "$(TargetDir)System.Windows.Controls.DataVisualization.Toolkit.dll" "$(SolutionDir)Grabacr07.KanColleViewer\bin\x64\$(ConfigurationName)\"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
