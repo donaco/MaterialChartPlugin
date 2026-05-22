@@ -1,11 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Livet;
 using Livet.EventListeners;
-using MetroTrilithon.Mvvm;
 using MaterialChartPlugin.Models;
 using MaterialChartPlugin.Models.Settings;
 using MaterialChartPlugin.Models.Utilities;

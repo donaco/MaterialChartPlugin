@@ -2,12 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Xaml;
-using MetroTrilithon.Serialization;
 
 namespace MaterialChartPlugin.Models.Settings
 {
 	/// <summary>
-	/// MetroTrilithon.Desktop の FileSettingsProvider をプラグイン内に内製化したクラスです。
+	/// ファイルベースの設定プロバイダーです（MetroTrilithon.Desktop より内製化）。
 	/// </summary>
 	public class FileSettingsProvider : ISerializationProvider
 	{

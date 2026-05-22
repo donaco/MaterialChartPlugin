@@ -161,7 +161,9 @@
     <Compile Include="Models\ChartPoint.cs" />
     <Compile Include="Models\Settings\ChartSettings.cs" />
     <Compile Include="Models\Settings\FileSettingsProvider.cs" />
+    <Compile Include="Models\Settings\ISerializationProvider.cs" />
     <Compile Include="Models\Settings\SerializableProperty.cs" />
+    <Compile Include="Models\Settings\SerializablePropertyBase.cs" />
     <Compile Include="Models\Settings\SettingsProviders.cs" />
     <Compile Include="Models\TimeMaterialsPair.cs" />
     <Compile Include="Models\Utilities\ChartExtensions.cs" />
@@ -234,9 +236,6 @@
     <ProjectReference Include="..\..\..\MetroRadiance\source\MetroRadiance\MetroRadiance.csproj">
       <Project>{0AF0B9FF-D981-4D0F-A41F-C3AB6FE2F16D}</Project>
       <Name>MetroRadiance</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\MetroTrilithon\source\MetroTrilithon\MetroTrilithon.csproj">
-      <Name>MetroTrilithon</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

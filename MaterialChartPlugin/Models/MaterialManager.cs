@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,7 +9,6 @@ using Grabacr07.KanColleWrapper;
 using System.Collections.ObjectModel;
 using System.Reactive.Linq;
 using System.ComponentModel;
-using MetroTrilithon.Mvvm;
 
 namespace MaterialChartPlugin.Models
 {
@@ -54,10 +53,9 @@ namespace MaterialChartPlugin.Models
         #endregion
 
         PropertyChangedEventListener listener;
+        PropertyChangedEventListener _isStartedListener;
 
         private IDisposable _loggingSubscription;
-
-        private IDisposable _isStartedSubscription;
 
         public MaterialManager(MaterialChartPlugin plugin)
         {
@@ -65,48 +63,49 @@ namespace MaterialChartPlugin.Models
 
             this.Log = new MaterialLog(plugin);
 
-            _isStartedSubscription = KanColleClient.Current
-                // KanColleClientのIsStartedがtrueに変更されたら資材データの購読を開始
-                .Subscribe(nameof(KanColleClient.IsStarted), () =>
+            // KanColleClientのIsStartedがtrueに変更されたら資材データの購読を開始
+            _isStartedListener = new PropertyChangedEventListener(KanColleClient.Current);
+            _isStartedListener.Add(nameof(KanColleClient.IsStarted), (s, e) =>
+            {
+                if (!KanColleClient.Current.IsStarted) return;
+
+                var materials = KanColleClient.Current.Homeport.Materials;
+                var adomiral = KanColleClient.Current.Homeport.Admiral;
+                listener?.Dispose();
+                listener = new PropertyChangedEventListener(materials)
                 {
-                    var materials = KanColleClient.Current.Homeport.Materials;
-                    var adomiral = KanColleClient.Current.Homeport.Admiral;
-                    listener?.Dispose();
-                    listener = new PropertyChangedEventListener(materials)
+                    { nameof(materials.Fuel),  (sender, ea) => RaisePropertyChanged(nameof(Fuel)) },
+                    { nameof(materials.Ammunition),  (sender, ea) => RaisePropertyChanged(nameof(Ammunition)) },
+                    { nameof(materials.Steel),  (sender, ea) => RaisePropertyChanged(nameof(Steel)) },
+                    { nameof(materials.Bauxite),  (sender, ea) => RaisePropertyChanged(nameof(Bauxite)) },
+                    { nameof(materials.InstantRepairMaterials),  (sender, ea) => RaisePropertyChanged(nameof(RepairTool)) },
+                    { nameof(materials.InstantBuildMaterials),  (sender, ea) => RaisePropertyChanged(nameof(InstantBuildTool)) },
+                    { nameof(adomiral.Level), (sender, ea) => RaisePropertyChanged(nameof(StorableMaterialLimit)) }
+                };
+
+                // 資材のロギング
+                _loggingSubscription?.Dispose();
+                _loggingSubscription = Observable.FromEvent<PropertyChangedEventHandler, PropertyChangedEventArgs>(
+                    h => (sender, ea) => h(ea),
+                    h => materials.PropertyChanged += h,
+                    h => materials.PropertyChanged -= h)
+                    // プロパティ名が一致しているか調べて
+                    .Where(ea => IsObservedPropertyName(ea.PropertyName))
+                    // まとめて通知が来るので10ms待機して
+                    .Throttle(TimeSpan.FromMilliseconds(10))
+                    // 処理
+                    .Subscribe((PropertyChangedEventArgs ea) =>
                     {
-                        { nameof(materials.Fuel),  (_,__) => RaisePropertyChanged(nameof(Fuel)) },
-                        { nameof(materials.Ammunition),  (_,__) => RaisePropertyChanged(nameof(Ammunition)) },
-                        { nameof(materials.Steel),  (_,__) => RaisePropertyChanged(nameof(Steel)) },
-                        { nameof(materials.Bauxite),  (_,__) => RaisePropertyChanged(nameof(Bauxite)) },
-                        { nameof(materials.InstantRepairMaterials),  (_,__) => RaisePropertyChanged(nameof(RepairTool)) },
-                        { nameof(materials.InstantBuildMaterials),  (_,__) => RaisePropertyChanged(nameof(InstantBuildTool)) },
-                        { nameof(adomiral.Level), (_, __) => RaisePropertyChanged(nameof(StorableMaterialLimit)) }
-                    };
-
-                    // 資材のロギング
-                    _loggingSubscription?.Dispose();
-                    _loggingSubscription = Observable.FromEvent<PropertyChangedEventHandler, PropertyChangedEventArgs>(
-                        h => (sender, e) => h(e),
-                        h => materials.PropertyChanged += h,
-                        h => materials.PropertyChanged -= h)
-                        // プロパティ名が一致しているか調べて
-                        .Where(e => IsObservedPropertyName(e.PropertyName))
-                        // まとめて通知が来るので10ms待機して
-                        .Throttle(TimeSpan.FromMilliseconds(10))
-                        // 処理
-                        .Subscribe(async _ =>
+                        if (Log.HasLoaded)
                         {
-                            if (Log.HasLoaded)
-                            {
-                                Log.History.Add(new TimeMaterialsPair(DateTime.Now, Fuel, Ammunition, Steel, Bauxite, RepairTool,
-                                    materials.DevelopmentMaterials, materials.InstantBuildMaterials, materials.ImprovementMaterials));
-                                await Log.SaveAsync();
-                            }
-                        });
+                            Log.History.Add(new TimeMaterialsPair(DateTime.Now, Fuel, Ammunition, Steel, Bauxite, RepairTool,
+                                materials.DevelopmentMaterials, materials.InstantBuildMaterials, materials.ImprovementMaterials));
+                            Log.SaveAsync().ConfigureAwait(false);
+                        }
+                    });
 
-                    this.IsAvailable = true;
-
-                }, false);
+                this.IsAvailable = true;
+            });
         }
 
         /// <summary>
@@ -132,7 +131,7 @@ namespace MaterialChartPlugin.Models
             // 先にLogをDisposeしてHasLoaded=falseにすることで、
             // Throttle残留中のロギングコールバックからのデータ書き込み・保存を防ぐ
             Log?.Dispose();
-            _isStartedSubscription?.Dispose();
+            _isStartedListener?.Dispose();
             _loggingSubscription?.Dispose();
             listener?.Dispose();
         }

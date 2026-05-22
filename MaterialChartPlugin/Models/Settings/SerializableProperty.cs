@@ -1,9 +1,7 @@
-using MetroTrilithon.Serialization;
-
 namespace MaterialChartPlugin.Models.Settings
 {
 	/// <summary>
-	/// MetroTrilithon.Desktop の SerializableProperty をプラグイン内に内製化したクラスです。
+	/// 内製化した SerializableProperty クラスです。
 	/// </summary>
 	public sealed class SerializableProperty<T> : SerializablePropertyBase<T>
 	{

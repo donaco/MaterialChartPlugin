@@ -10,7 +10,6 @@ using System.Windows.Input;
 using Livet;
 using Livet.Commands;
 using Livet.EventListeners;
-using MetroTrilithon.Mvvm;
 using MaterialChartPlugin.Models;
 using MaterialChartPlugin.Models.Settings;
 using MaterialChartPlugin.Models.Utilities;
