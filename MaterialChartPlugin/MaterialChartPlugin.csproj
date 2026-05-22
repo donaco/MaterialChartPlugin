@@ -160,10 +160,13 @@
     <Compile Include="Models\DisplayedPeriod.cs" />
     <Compile Include="Models\ChartPoint.cs" />
     <Compile Include="Models\Settings\ChartSettings.cs" />
+    <Compile Include="Models\Settings\FileSettingsProvider.cs" />
+    <Compile Include="Models\Settings\SerializableProperty.cs" />
     <Compile Include="Models\Settings\SettingsProviders.cs" />
     <Compile Include="Models\TimeMaterialsPair.cs" />
     <Compile Include="Models\Utilities\ChartExtensions.cs" />
     <Compile Include="Models\Utilities\ChartUtilities.cs" />
+    <Compile Include="ViewModels\DisplayViewModel.cs" />
     <Compile Include="ViewModels\ToolViewModel.cs" />
     <Compile Include="Views\Converters\EnumToBooleanConverter.cs" />
     <Compile Include="Views\Converters\InverseBoolToVisibilityConverter.cs" />
@@ -235,10 +238,6 @@
     <ProjectReference Include="..\..\..\MetroTrilithon\source\MetroTrilithon\MetroTrilithon.csproj">
       <Name>MetroTrilithon</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\MetroTrilithon\source\MetroTrilithon.Desktop\MetroTrilithon.Desktop.csproj">
-      <Project>{4E2EB2E0-E5FE-4FEB-A3E5-5F2F05CD1A67}</Project>
-      <Name>MetroTrilithon.Desktop</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\Grabacr07.KanColleWrapper\KanColleWrapper.csproj">
@@ -252,10 +251,6 @@
 xcopy /Y "$(TargetPath)" "$(SolutionDir)Grabacr07.KanColleViewer\bin\$(ConfigurationName)\Plugins\"
 mkdir "$(SolutionDir)Grabacr07.KanColleViewer\bin\x64\$(ConfigurationName)\Plugins" 2&gt;nul
 xcopy /Y "$(TargetPath)" "$(SolutionDir)Grabacr07.KanColleViewer\bin\x64\$(ConfigurationName)\Plugins\"
-xcopy /Y "$(TargetDir)MetroTrilithon.Desktop.dll" "$(SolutionDir)Grabacr07.KanColleViewer\bin\$(ConfigurationName)\Plugins\"
-xcopy /Y "$(TargetDir)MetroTrilithon.Desktop.dll" "$(SolutionDir)Grabacr07.KanColleViewer\bin\x64\$(ConfigurationName)\Plugins\"
-xcopy /Y "$(TargetDir)MetroTrilithon.dll" "$(SolutionDir)Grabacr07.KanColleViewer\bin\$(ConfigurationName)\Plugins\"
-xcopy /Y "$(TargetDir)MetroTrilithon.dll" "$(SolutionDir)Grabacr07.KanColleViewer\bin\x64\$(ConfigurationName)\Plugins\"
 xcopy /Y "$(TargetDir)System.Windows.Controls.DataVisualization.Toolkit.dll" "$(SolutionDir)Grabacr07.KanColleViewer\bin\$(ConfigurationName)\"
 xcopy /Y "$(TargetDir)System.Windows.Controls.DataVisualization.Toolkit.dll" "$(SolutionDir)Grabacr07.KanColleViewer\bin\x64\$(ConfigurationName)\"</PostBuildEvent>
   </PropertyGroup>

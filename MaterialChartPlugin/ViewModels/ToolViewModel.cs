@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
@@ -6,7 +6,9 @@ using System.Linq;
 using System.Reactive.Disposables;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
 using Livet;
+using Livet.Commands;
 using Livet.EventListeners;
 using MetroTrilithon.Mvvm;
 using MaterialChartPlugin.Models;
@@ -274,6 +276,11 @@ namespace MaterialChartPlugin.ViewModels
 
         PropertyChangedEventListener logChangedListener;
 
+        public ICommand OpenPopupWindowCommand { get; private set; }
+        public ICommand ImportMaterialDataCommand { get; private set; }
+        public ICommand ExportMaterialDataCommand { get; private set; }
+        public ICommand ExportAsCsvCommand { get; private set; }
+
         public ToolViewModel(MaterialChartPlugin plugin)
         {
             try
@@ -293,6 +300,11 @@ namespace MaterialChartPlugin.ViewModels
                     DisplayViewModel.Create(DisplayedPeriod.OneYear, "1年"),
                     DisplayViewModel.Create(DisplayedPeriod.ThreeYears, "3年")
                 };
+
+                OpenPopupWindowCommand = new ViewModelCommand(OpenPopupWindow);
+                ImportMaterialDataCommand = new ViewModelCommand(async () => await ImportMaterialData());
+                ExportMaterialDataCommand = new ViewModelCommand(async () => await ExportMaterialData());
+                ExportAsCsvCommand = new ViewModelCommand(async () => await ExportAsCsv());
                 
                 System.Diagnostics.Debug.WriteLine("ToolViewModel: Constructor completed");
             }
@@ -510,7 +522,7 @@ namespace MaterialChartPlugin.ViewModels
             YMax2 = ChartUtilities.GetYAxisMax(this.mostRepairTool, interval);
         }
 
-        public async void ExportAsCsv()
+        public async Task ExportAsCsv()
         {
             var fileDialog = new SaveFileDialog()
             {
@@ -526,7 +538,7 @@ namespace MaterialChartPlugin.ViewModels
             }
         }
 
-        public async void ImportMaterialData()
+        public async Task ImportMaterialData()
         {
             var fileDialog = new OpenFileDialog()
             {
@@ -545,7 +557,7 @@ namespace MaterialChartPlugin.ViewModels
             }
         }
 
-        public async void ExportMaterialData()
+        public async Task ExportMaterialData()
         {
             var fileDialog = new SaveFileDialog()
             {
