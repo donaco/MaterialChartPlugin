@@ -7,7 +7,6 @@ using System.Text;
 using System.Threading.Tasks;
 using MaterialChartPlugin.Views;
 using MaterialChartPlugin.ViewModels;
-using Livet;
 using System.IO;
 using System.Reflection;
 

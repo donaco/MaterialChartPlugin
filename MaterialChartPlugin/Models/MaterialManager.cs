@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Livet;
-using Livet.EventListeners;
+using CommunityToolkit.Mvvm.ComponentModel;
 using Grabacr07.KanColleWrapper;
 using System.Collections.ObjectModel;
 using System.Reactive.Linq;
@@ -12,7 +11,7 @@ using System.ComponentModel;
 
 namespace MaterialChartPlugin.Models
 {
-    public class MaterialManager : NotificationObject, IDisposable
+    public class MaterialManager : ObservableObject, IDisposable
     {
         private MaterialChartPlugin plugin;
 
@@ -47,14 +46,13 @@ namespace MaterialChartPlugin.Models
                 if (_IsAvailable == value)
                     return;
                 _IsAvailable = value;
-                RaisePropertyChanged();
+                this.OnPropertyChanged();
             }
         }
         #endregion
 
-        PropertyChangedEventListener listener;
-        PropertyChangedEventListener _isStartedListener;
-
+        private IDisposable _isStartedSubscription;
+        private IDisposable _materialsSubscription;
         private IDisposable _loggingSubscription;
 
         public MaterialManager(MaterialChartPlugin plugin)
@@ -64,31 +62,39 @@ namespace MaterialChartPlugin.Models
             this.Log = new MaterialLog(plugin);
 
             // KanColleClientのIsStartedがtrueに変更されたら資材データの購読を開始
-            _isStartedListener = new PropertyChangedEventListener(KanColleClient.Current);
-            _isStartedListener.Add(nameof(KanColleClient.IsStarted), (s, e) =>
-            {
-                if (!KanColleClient.Current.IsStarted) return;
-
-                var materials = KanColleClient.Current.Homeport.Materials;
-                var adomiral = KanColleClient.Current.Homeport.Admiral;
-                listener?.Dispose();
-                listener = new PropertyChangedEventListener(materials)
+            _isStartedSubscription = Observable.FromEvent<PropertyChangedEventHandler, PropertyChangedEventArgs>(
+                h => (s, e) => h(e),
+                h => KanColleClient.Current.PropertyChanged += h,
+                h => KanColleClient.Current.PropertyChanged -= h)
+                .Where(e => e.PropertyName == nameof(KanColleClient.IsStarted))
+                .Subscribe(e =>
                 {
-                    { nameof(materials.Fuel),  (sender, ea) => RaisePropertyChanged(nameof(Fuel)) },
-                    { nameof(materials.Ammunition),  (sender, ea) => RaisePropertyChanged(nameof(Ammunition)) },
-                    { nameof(materials.Steel),  (sender, ea) => RaisePropertyChanged(nameof(Steel)) },
-                    { nameof(materials.Bauxite),  (sender, ea) => RaisePropertyChanged(nameof(Bauxite)) },
-                    { nameof(materials.InstantRepairMaterials),  (sender, ea) => RaisePropertyChanged(nameof(RepairTool)) },
-                    { nameof(materials.InstantBuildMaterials),  (sender, ea) => RaisePropertyChanged(nameof(InstantBuildTool)) },
-                    { nameof(adomiral.Level), (sender, ea) => RaisePropertyChanged(nameof(StorableMaterialLimit)) }
-                };
+                    if (!KanColleClient.Current.IsStarted) return;
 
-                // 資材のロギング
-                _loggingSubscription?.Dispose();
-                _loggingSubscription = Observable.FromEvent<PropertyChangedEventHandler, PropertyChangedEventArgs>(
-                    h => (sender, ea) => h(ea),
-                    h => materials.PropertyChanged += h,
-                    h => materials.PropertyChanged -= h)
+                    var materials = KanColleClient.Current.Homeport.Materials;
+                    var admiral = KanColleClient.Current.Homeport.Admiral;
+
+                    _materialsSubscription?.Dispose();
+                    _materialsSubscription = Observable.FromEvent<PropertyChangedEventHandler, PropertyChangedEventArgs>(
+                        h => (s, ea) => h(ea),
+                        h => materials.PropertyChanged += h,
+                        h => materials.PropertyChanged -= h)
+                        .Subscribe(ea =>
+                        {
+                            if (ea.PropertyName == nameof(materials.Fuel)) this.OnPropertyChanged(nameof(Fuel));
+                            else if (ea.PropertyName == nameof(materials.Ammunition)) this.OnPropertyChanged(nameof(Ammunition));
+                            else if (ea.PropertyName == nameof(materials.Steel)) this.OnPropertyChanged(nameof(Steel));
+                            else if (ea.PropertyName == nameof(materials.Bauxite)) this.OnPropertyChanged(nameof(Bauxite));
+                            else if (ea.PropertyName == nameof(materials.InstantRepairMaterials)) this.OnPropertyChanged(nameof(RepairTool));
+                            else if (ea.PropertyName == nameof(materials.InstantBuildMaterials)) this.OnPropertyChanged(nameof(InstantBuildTool));
+                        });
+
+                    // 資材のロギング
+                    _loggingSubscription?.Dispose();
+                    _loggingSubscription = Observable.FromEvent<PropertyChangedEventHandler, PropertyChangedEventArgs>(
+                        h => (s, ea) => h(ea),
+                        h => materials.PropertyChanged += h,
+                        h => materials.PropertyChanged -= h)
                     // プロパティ名が一致しているか調べて
                     .Where(ea => IsObservedPropertyName(ea.PropertyName))
                     // まとめて通知が来るので10ms待機して
@@ -131,9 +137,9 @@ namespace MaterialChartPlugin.Models
             // 先にLogをDisposeしてHasLoaded=falseにすることで、
             // Throttle残留中のロギングコールバックからのデータ書き込み・保存を防ぐ
             Log?.Dispose();
-            _isStartedListener?.Dispose();
+            _isStartedSubscription?.Dispose();
+            _materialsSubscription?.Dispose();
             _loggingSubscription?.Dispose();
-            listener?.Dispose();
         }
     }
 }

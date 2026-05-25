@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Livet;
-using Livet.EventListeners;
 using MaterialChartPlugin.Models;
 using MaterialChartPlugin.Models.Settings;
 using MaterialChartPlugin.Models.Utilities;
@@ -13,7 +11,7 @@ using Reactive.Bindings;
 
 namespace MaterialChartPlugin.ViewModels
 {
-    public class CsvLoadViewModel : ViewModel
+    public class CsvLoadViewModel : CommunityToolkit.Mvvm.ComponentModel.ObservableObject
     {
         public ReactiveProperty<string> FilePath { get; private set; }
 

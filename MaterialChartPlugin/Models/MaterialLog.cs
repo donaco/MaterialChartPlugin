@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,12 +7,12 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Runtime.Serialization;
 using System.Xml;
-using Livet;
+using CommunityToolkit.Mvvm.ComponentModel;
 using Grabacr07.KanColleWrapper;
 
 namespace MaterialChartPlugin.Models
 {
-    public class MaterialLog : NotificationObject, IDisposable
+    public class MaterialLog : ObservableObject, IDisposable
     {
         static readonly string localDirectoryPath = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
@@ -47,7 +47,7 @@ namespace MaterialChartPlugin.Models
                 if (_HasLoaded == value)
                     return;
                 _HasLoaded = value;
-                RaisePropertyChanged();
+                this.OnPropertyChanged();
             }
         }
         #endregion

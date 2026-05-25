@@ -2,14 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Linq;
 using System.Reactive.Disposables;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using Livet;
-using Livet.Commands;
-using Livet.EventListeners;
+using CommunityToolkit.Mvvm.ComponentModel;
 using MaterialChartPlugin.Models;
 using MaterialChartPlugin.Models.Settings;
 using MaterialChartPlugin.Models.Utilities;
@@ -19,7 +18,67 @@ using Microsoft.Win32;
 
 namespace MaterialChartPlugin.ViewModels
 {
-    public class ToolViewModel : ViewModel
+    /// <summary>
+    /// Livet ViewModelCommand の代替
+    /// </summary>
+    public class ViewModelCommand : ICommand
+    {
+        private readonly Action _execute;
+        private readonly Func<bool> _canExecute;
+
+        public event EventHandler CanExecuteChanged
+        {
+            add { CommandManager.RequerySuggested += value; }
+            remove { CommandManager.RequerySuggested -= value; }
+        }
+
+        public ViewModelCommand(Action execute) : this(execute, null) { }
+
+        public ViewModelCommand(Action execute, Func<bool> canExecute)
+        {
+            this._execute = execute ?? throw new ArgumentNullException(nameof(execute));
+            this._canExecute = canExecute;
+        }
+
+        public bool CanExecute(object parameter) => this._canExecute?.Invoke() ?? true;
+
+        public void Execute(object parameter) => this._execute();
+    }
+
+    public class ViewModelCommand<T> : ICommand
+    {
+        private readonly Action<T> _execute;
+        private readonly Func<T, bool> _canExecute;
+
+        public event EventHandler CanExecuteChanged
+        {
+            add { CommandManager.RequerySuggested += value; }
+            remove { CommandManager.RequerySuggested -= value; }
+        }
+
+        public ViewModelCommand(Action<T> execute) : this(execute, null) { }
+
+        public ViewModelCommand(Action<T> execute, Func<T, bool> canExecute)
+        {
+            this._execute = execute ?? throw new ArgumentNullException(nameof(execute));
+            this._canExecute = canExecute;
+        }
+
+        public bool CanExecute(object parameter)
+        {
+            if (parameter is T t) return this._canExecute?.Invoke(t) ?? true;
+            if (parameter == null && !typeof(T).IsValueType) return this._canExecute?.Invoke(default) ?? true;
+            return false;
+        }
+
+        public void Execute(object parameter)
+        {
+            if (parameter is T t) this._execute(t);
+            else if (parameter == null && !typeof(T).IsValueType) this._execute(default);
+        }
+    }
+
+    public class ToolViewModel : ObservableObject, IDisposable
     {
         private MaterialChartPlugin plugin;
 
@@ -49,7 +108,7 @@ namespace MaterialChartPlugin.ViewModels
                 if (_IsPopupMode == value)
                     return;
                 _IsPopupMode = value;
-                RaisePropertyChanged();
+                this.OnPropertyChanged();
             }
         }
         #endregion
@@ -66,7 +125,7 @@ namespace MaterialChartPlugin.ViewModels
                 if (_IsTopMost == value)
                     return;
                 _IsTopMost = value;
-                RaisePropertyChanged();
+                this.OnPropertyChanged();
             }
         }
         #endregion
@@ -83,7 +142,7 @@ namespace MaterialChartPlugin.ViewModels
                 if (_FuelSeries == value)
                     return;
                 _FuelSeries = value;
-                RaisePropertyChanged();
+                this.OnPropertyChanged();
             }
         }
         #endregion
@@ -100,7 +159,7 @@ namespace MaterialChartPlugin.ViewModels
                 if (_AmmunitionSeries == value)
                     return;
                 _AmmunitionSeries = value;
-                RaisePropertyChanged();
+                this.OnPropertyChanged();
             }
         }
         #endregion
@@ -117,7 +176,7 @@ namespace MaterialChartPlugin.ViewModels
                 if (_SteelSeries == value)
                     return;
                 _SteelSeries = value;
-                RaisePropertyChanged();
+                this.OnPropertyChanged();
             }
         }
         #endregion
@@ -134,7 +193,7 @@ namespace MaterialChartPlugin.ViewModels
                 if (_BauxiteSeries == value)
                     return;
                 _BauxiteSeries = value;
-                RaisePropertyChanged();
+                this.OnPropertyChanged();
             }
         }
         #endregion
@@ -152,7 +211,7 @@ namespace MaterialChartPlugin.ViewModels
                 if (_RepairToolSeries == value)
                     return;
                 _RepairToolSeries = value;
-                RaisePropertyChanged();
+                this.OnPropertyChanged();
             }
         }
         #endregion
@@ -169,7 +228,7 @@ namespace MaterialChartPlugin.ViewModels
                 if (_InstantBuildToolSeries == value)
                     return;
                 _InstantBuildToolSeries = value;
-                RaisePropertyChanged();
+                this.OnPropertyChanged();
             }
         }
         #endregion
@@ -186,7 +245,7 @@ namespace MaterialChartPlugin.ViewModels
                 if (_StorableLimitSeries == value)
                     return;
                 _StorableLimitSeries = value;
-                RaisePropertyChanged();
+                this.OnPropertyChanged();
             }
         }
         #endregion
@@ -203,7 +262,7 @@ namespace MaterialChartPlugin.ViewModels
                 if (_XMin == value)
                     return;
                 _XMin = value;
-                RaisePropertyChanged();
+                this.OnPropertyChanged();
             }
         }
         #endregion
@@ -220,7 +279,7 @@ namespace MaterialChartPlugin.ViewModels
                 if (_XMax == value)
                     return;
                 _XMax = value;
-                RaisePropertyChanged();
+                this.OnPropertyChanged();
             }
         }
         #endregion
@@ -237,7 +296,7 @@ namespace MaterialChartPlugin.ViewModels
                 if (_YMax1 == value)
                     return;
                 _YMax1 = value;
-                RaisePropertyChanged();
+                this.OnPropertyChanged();
             }
         }
         #endregion
@@ -254,7 +313,7 @@ namespace MaterialChartPlugin.ViewModels
                 if (_YMax2 == value)
                     return;
                 _YMax2 = value;
-                RaisePropertyChanged();
+                this.OnPropertyChanged();
             }
         }
         #endregion
@@ -271,9 +330,9 @@ namespace MaterialChartPlugin.ViewModels
 
         private IDisposable _displayedPeriodSubscription;
 
-        PropertyChangedEventListener managerChangedListener;
+        private IDisposable _logChangedSubscription;
 
-        PropertyChangedEventListener logChangedListener;
+        private IDisposable _managerChangedSubscription;
 
         public ICommand OpenPopupWindowCommand { get; private set; }
         public ICommand ImportMaterialDataCommand { get; private set; }
@@ -319,47 +378,48 @@ namespace MaterialChartPlugin.ViewModels
             try
             {
                 System.Diagnostics.Debug.WriteLine("ToolViewModel: Initialize started");
-                
+
                 await materialManager.Initialize();
 
                 var history = materialManager.Log.History;
 
                 // データ初期読み込み
-                logChangedListener = new PropertyChangedEventListener(materialManager.Log)
+                _logChangedSubscription = Observable.FromEvent<PropertyChangedEventHandler, PropertyChangedEventArgs>(
+                    h => (s, e) => h(e),
+                    h => materialManager.Log.PropertyChanged += h,
+                    h => materialManager.Log.PropertyChanged -= h)
+                    .Where(e => e.PropertyName == nameof(materialManager.Log.HasLoaded))
+                    .Subscribe(_ =>
                     {
-                        { nameof(materialManager.Log.HasLoaded), (_, __) =>
-                            {
-                                if (materialManager.Log.HasLoaded)
-                                    RefleshData();
-                            }
-                        }
-                    };
-                disposables.Add(logChangedListener);
+                        if (materialManager.Log.HasLoaded)
+                            RefleshData();
+                    });
+                disposables.Add(_logChangedSubscription);
 
                 // 資材データの通知設定
-                managerChangedListener = new PropertyChangedEventListener(materialManager)
+                _managerChangedSubscription = Observable.FromEvent<PropertyChangedEventHandler, PropertyChangedEventArgs>(
+                    h => (s, e) => h(e),
+                    h => materialManager.PropertyChanged += h,
+                    h => materialManager.PropertyChanged -= h)
+                    .Subscribe(e =>
+                    {
+                        if (e.PropertyName == nameof(materialManager.Fuel)) this.OnPropertyChanged(nameof(Fuel));
+                        else if (e.PropertyName == nameof(materialManager.Ammunition)) this.OnPropertyChanged(nameof(Ammunition));
+                        else if (e.PropertyName == nameof(materialManager.Steel)) this.OnPropertyChanged(nameof(Steel));
+                        else if (e.PropertyName == nameof(materialManager.Bauxite)) this.OnPropertyChanged(nameof(Bauxite));
+                        else if (e.PropertyName == nameof(materialManager.RepairTool)) this.OnPropertyChanged(nameof(RepairTool));
+                        else if (e.PropertyName == nameof(materialManager.InstantBuildTool)) this.OnPropertyChanged(nameof(InstantBuildTool));
+                        else if (e.PropertyName == nameof(materialManager.IsAvailable))
                         {
-                            { nameof(materialManager.Fuel),  (_,__) => RaisePropertyChanged(nameof(Fuel)) },
-                            { nameof(materialManager.Ammunition),  (_,__) => RaisePropertyChanged(nameof(Ammunition)) },
-                            { nameof(materialManager.Steel),  (_,__) => RaisePropertyChanged(nameof(Steel)) },
-                            { nameof(materialManager.Bauxite),  (_,__) => RaisePropertyChanged(nameof(Bauxite)) },
-                            { nameof(materialManager.RepairTool),  (_,__) => RaisePropertyChanged(nameof(RepairTool)) },
-                            { nameof(materialManager.InstantBuildTool),  (_,__) => RaisePropertyChanged(nameof(InstantBuildTool)) },
+                            _displayedPeriodSubscription?.Dispose();
+                            _displayedPeriodSubscription = ChartSettings.DisplayedPeriod.Subscribe(___ =>
                             {
-                                // materialManagerの初期化が完了したら、DisplayedPeriodの変更時に更新を行うよう設定
-                                nameof(materialManager.IsAvailable),
-                                (_,__) =>
-                                {
-                                    _displayedPeriodSubscription?.Dispose();
-                                    _displayedPeriodSubscription = ChartSettings.DisplayedPeriod.Subscribe(___ =>
-                                    {
-                                        RefleshData();
-                                        RaisePropertyChanged(nameof(DisplayedPeriod));
-                                    });
-                                }
-                            }
-                        };
-                disposables.Add(managerChangedListener);
+                                RefleshData();
+                                this.OnPropertyChanged(nameof(DisplayedPeriod));
+                            });
+                        }
+                    });
+                disposables.Add(_managerChangedSubscription);
                 disposables.Add(materialManager);
 
                 // データ更新設定
@@ -572,14 +632,12 @@ namespace MaterialChartPlugin.ViewModels
             }
         }
 
-        protected override void Dispose(bool disposing)
+        public void Dispose()
         {
-            if (disposing)
-            {
-                _displayedPeriodSubscription?.Dispose();
-                disposables.Dispose();
-            }
-            base.Dispose(disposing);
+            _displayedPeriodSubscription?.Dispose();
+            _logChangedSubscription?.Dispose();
+            _managerChangedSubscription?.Dispose();
+            disposables.Dispose();
         }
     }
 }

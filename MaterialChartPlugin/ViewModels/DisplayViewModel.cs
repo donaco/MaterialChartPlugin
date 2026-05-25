@@ -1,9 +1,10 @@
 using System.Collections.Generic;
 using System.Linq;
-using Livet;
 
 namespace MaterialChartPlugin.ViewModels
 {
+	using CommunityToolkit.Mvvm.ComponentModel;
+
 	/// <summary>
 	/// MetroTrilithon.Desktop の DisplayViewModel をプラグイン内に内製化したクラスです。
 	/// </summary>
@@ -15,7 +16,7 @@ namespace MaterialChartPlugin.ViewModels
 		}
 	}
 
-	public class DisplayViewModel<T> : ViewModel
+	public class DisplayViewModel<T> : ObservableObject
 	{
 		private T _value;
 		public T Value
@@ -26,7 +27,7 @@ namespace MaterialChartPlugin.ViewModels
 				if (!Equals(_value, value))
 				{
 					_value = value;
-					RaisePropertyChanged();
+					this.OnPropertyChanged();
 				}
 			}
 		}
@@ -40,7 +41,7 @@ namespace MaterialChartPlugin.ViewModels
 				if (_display != value)
 				{
 					_display = value;
-					RaisePropertyChanged();
+					this.OnPropertyChanged();
 				}
 			}
 		}
