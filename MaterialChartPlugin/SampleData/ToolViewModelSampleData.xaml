@@ -1,7 +1,5 @@
-﻿<ViewModels:ToolViewModel xmlns:ViewModels="clr-namespace:MaterialChartPlugin.ViewModels"
-                          xmlns:Models="clr-namespace:MaterialChartPlugin.Models"
-                          xmlns:Livet="clr-namespace:Livet;assembly=Livet"
-                          xmlns:Messaging="clr-namespace:Livet.Messaging;assembly=Livet" 
+<ViewModels:ToolViewModel xmlns:ViewModels="clr-namespace:MaterialChartPlugin.ViewModels"
+                          xmlns:Models="clr-namespace:MaterialChartPlugin.Models" 
                           Ammunition="5882"
                           Bauxite="3965"
                           Fuel="237435" 
@@ -65,9 +63,6 @@
         <Models:ChartPoint X="2015/09/11 2:00:00" Y="4048"/>
         <Models:ChartPoint X="2015/09/11 3:00:00" Y="4042"/>
     </ViewModels:ToolViewModel.BauxiteSeries>
-	<ViewModels:ToolViewModel.CompositeDisposable>
-		<Livet:LivetCompositeDisposable Count="76" IsReadOnly="True"/>
-	</ViewModels:ToolViewModel.CompositeDisposable>
 	<ViewModels:ToolViewModel.FuelSeries>
         <Models:ChartPoint X="2015/09/10 3:00:00" Y="6738"/>
         <Models:ChartPoint X="2015/09/10 4:00:00" Y="6981"/>
@@ -95,10 +90,7 @@
         <Models:ChartPoint X="2015/09/11 2:00:00" Y="6832"/>
         <Models:ChartPoint X="2015/09/11 3:00:00" Y="6461"/>
     </ViewModels:ToolViewModel.FuelSeries>
-	<ViewModels:ToolViewModel.Messenger>
-		<Messaging:InteractionMessenger/>
-	</ViewModels:ToolViewModel.Messenger>
-    <ViewModels:ToolViewModel.SteelSeries>
+	<ViewModels:ToolViewModel.SteelSeries>
         <Models:ChartPoint X="2015/09/10 3:00:00" Y="4843"/>
         <Models:ChartPoint X="2015/09/10 4:00:00" Y="5202"/>
         <Models:ChartPoint X="2015/09/10 5:00:00" Y="5445"/>
