@@ -289,18 +289,18 @@
                 <chartingToolkit:AreaSeries DependentValuePath="Y" IndependentValuePath="X" ItemsSource="{Binding InstantBuildToolSeries}" Title="高速建造材" Style="{DynamicResource SimpleAreaSeriesStyle}" BorderBrush="#FFC7844D"/>
             </chartingToolkit:Chart>
             <Border BorderBrush="{DynamicResource BorderBrushKey}" BorderThickness="0,0,0,1" Margin="0,20,0,10" />
-            <WrapPanel Margin="10,0,10,10">
-                <!-- ポップアップボタン（ポップアップ内では非表示） -->
-                <Button Content="別ウィンドウで表示"
-                           Command="{Binding OpenPopupWindowCommand}"
-                           HorizontalAlignment="Stretch"
-                           Margin="0,5,5,5"
-                           Height="35"
-                           Visibility="{Binding IsPopupMode, Converter={StaticResource InverseBoolToVisibilityConverter}}" />
-                <Button Content="バックアップデータのインポート" Command="{Binding ImportMaterialDataCommand}" Width="180" HorizontalAlignment="Left" VerticalAlignment="Center" Height="35" Margin="0,5,5,5"/>
-                <Button Content="バックアップデータのエクスポート" Command="{Binding ExportMaterialDataCommand}" Width="180" HorizontalAlignment="Left" VerticalAlignment="Center" Height="35" Margin="0,5,5,5"/>
-                <Button Content=".csv形式でエクスポート" Command="{Binding ExportAsCsvCommand}" Width="180" HorizontalAlignment="Left" VerticalAlignment="Center" Height="35" Margin="0,5,5,5"/>
-            </WrapPanel>
+			<WrapPanel Margin="10,0,10,10">
+				<!-- ポップアップボタン（ポップアップ内では非表示） -->
+				<Button Content="別ウィンドウで表示"
+						Command="{Binding OpenPopupWindowCommand}"
+						HorizontalAlignment="Stretch"
+						Padding="10"
+						Margin="0,5,5,5"
+						Visibility="{Binding IsPopupMode, Converter={StaticResource InverseBoolToVisibilityConverter}}" />
+				<Button Content="バックアップデータのインポート" Command="{Binding ImportMaterialDataCommand}" Padding="10" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,5,5,5"/>
+				<Button Content="バックアップデータのエクスポート" Command="{Binding ExportMaterialDataCommand}" Padding="10" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,5,5,5"/>
+				<Button Content=".csv形式でエクスポート" Command="{Binding ExportAsCsvCommand}" Padding="10" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,5,5,5"/>
+			</WrapPanel>
         </StackPanel>
     </ScrollViewer>
 </UserControl>
