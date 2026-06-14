@@ -202,8 +202,21 @@
                             <ColumnDefinition Width="18"/>
                             <ColumnDefinition Width="40"/>
                         </Grid.ColumnDefinitions>
-                        <Path Data="M6.3108872E-30,4.1030015 L3.3666228,25.8279 C9.4233457,29.045308 15.565663,29.127849 21.800335,25.8279 L25.400002,4.1030015 C19.533668,10.736336 5.8247606,10.638561 6.3108872E-30,4.1030015 z M0.53400284,3.1024193 C8.6425927,-0.99357788 16.763303,-0.98370911 24.867,2.8356944 23.730169,4.0349751 22.529176,5.0011815 21.200334,5.5029586 15.308794,3.6684347 9.5866673,3.640014 4.0670011,5.7700066 2.9250013,5.2639936 1.7387949,4.2830441 0.53400284,3.1024193 z M5.1420025,6.415456 C10.511568,8.782226 15.012181,8.6718045 20.241998,6.2154717 14.942829,4.6546567 10.442839,4.7750539 5.1420025,6.415456 z" Fill="#FFA2C08B" Stretch="Uniform"/>
-                        <TextBlock TextWrapping="Wrap" Text="{Binding RepairTool}" d:LayoutOverrides="Width, Height" Grid.Column="1" HorizontalAlignment="Right" FontSize="14.667" VerticalAlignment="Center"/>
+						<Path Grid.Column="0"
+							  Stretch="Uniform"
+							  Stroke="Black"
+							  StrokeThickness="0.5"
+							  Data="M6,7.27 L6,9.27 L8,20.77 L17,20.77 L19,9.27 L19,7.27 Z">
+							<Path.Fill>
+								<LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
+									<GradientStop Color="#D4ED30" Offset="0"/>
+									<GradientStop Color="#C5DF30" Offset="0.19"/>
+									<GradientStop Color="#9FBA30" Offset="0.55"/>
+									<GradientStop Color="#688632" Offset="1"/>
+								</LinearGradientBrush>
+							</Path.Fill>
+						</Path>
+						<TextBlock TextWrapping="Wrap" Text="{Binding RepairTool}" d:LayoutOverrides="Width, Height" Grid.Column="1" HorizontalAlignment="Right" FontSize="14.667" VerticalAlignment="Center"/>
                     </Grid>
                     <Grid Margin="5,5,20,5" Height="24">
                         <Grid.ColumnDefinitions>
@@ -211,33 +224,24 @@
                             <ColumnDefinition Width="40"/>
                         </Grid.ColumnDefinitions>
 
-                        <Viewbox Grid.Column="0" Width="22.5" Height="22.5" Stretch="Uniform">
-                            <Canvas Width="25.56" Height="28.27">
-                                <Canvas.Resources>
-                                    <RadialGradientBrush x:Key="InstantBuildBodyBrush"
-                                 Center="0.6972,0.6226"
-                                 GradientOrigin="0.6972,0.6226"
-                                 RadiusX="0.2445"
-                                 RadiusY="0.2211">
-                                        <GradientStop Offset="0.00" Color="#FFE26B25"/>
-                                        <GradientStop Offset="0.41" Color="#FFE16C26"/>
-                                        <GradientStop Offset="0.56" Color="#FFE0702D"/>
-                                        <GradientStop Offset="0.67" Color="#FFDD7639"/>
-                                        <GradientStop Offset="0.75" Color="#FFDA804A"/>
-                                        <GradientStop Offset="0.83" Color="#FFD68D60"/>
-                                        <GradientStop Offset="0.89" Color="#FFD09D7B"/>
-                                        <GradientStop Offset="0.95" Color="#FFCAB09B"/>
-                                        <GradientStop Offset="1.00" Color="#FFC4C4BD"/>
-                                    </RadialGradientBrush>
-                                </Canvas.Resources>
-                                <Path Fill="#FFC4C4BD" Data="M16.41,6.39s1.43-.52,1.93-.52,2.02.54,2.02.54v1.12s-1.47.51-1.98.5-1.96-.55-1.96-.55v-1.1Z"/>
-                                <Path Fill="#FFC4C4BD" Data="M16.04,7.88v1.61s1.24.67,2.33.69c.51,0,1.99-.48,1.99-.48l-.02-1.65s-1.43.42-1.94.43c-.73.01-2.36-.59-2.36-.59Z"/>
-                                <Path Fill="{StaticResource InstantBuildBodyBrush}" Data="M15.85,9.91s1.37.65,2.51.66c.6,0,2.22-.46,2.22-.46,0,0,1.22.94,1.43,1.55.16.47.15,2.66.15,2.66l-.02,9.38s-1.66,1.61-4.6,1.59c-2.58-.01-4.02-1.6-4.02-1.6v-9.19s-.04-1.71-.04-2c0-1.64,2.37-2.6,2.37-2.6Z"/>
-                                <Path Fill="#FFC4C4BD" Stroke="#FF040000" StrokeThickness="0.5" StrokeMiterLimit="10" Data="M8.43,16.45l16.01-6.45s.51-.21.75.22c.32.58-.08.87-.08.87l-15.65,7.62s-1.15.24-1.46-.59c-.42-1.13.43-1.67.43-1.67Z"/>
-                                <Polygon Fill="#FFE26B25" Points="4.21,12.81 0.18,16.89 0.21,18.44 1.5,19.82 4.07,20.07 8.16,17.83 8.13,16.62 5.92,16.75 6.11,14.46 4.51,14.68 4.21,12.81"/>
-                            </Canvas>
-                        </Viewbox>
-                        <TextBlock TextWrapping="Wrap" Text="{Binding InstantBuildTool}" d:LayoutOverrides="Width, Height" Grid.Column="1" HorizontalAlignment="Right" FontSize="14.667" VerticalAlignment="Center"/>
+						<Grid Grid.Column="0">
+							<!-- メイン形状 -->
+							<Path Stroke="Black"
+								  StrokeThickness="0.5"
+								  Stretch="Uniform"
+								  Data="M13,20.77h6v-9c0-.5-.24-.98-.64-1.28l-1.36-1.02v-2.7h-2v1 c-.91.1-1.68.45-2.39.98s-1.11,1.4-1.11,2.3 c-.11.54.35,4.05-.5,4.23v-1.5l-.5.5v-3l-1,2-.5-1-.5-1.5-.5,1.5-.5,1-1-1.5v3s-1-.5-1-.5v2.5 c-.05,1.04.8,1.83,1.5,2.5h3c.5-.5,1-.5,1.5-2l.55-.55 c.61-.61.95-1.43.95-2.29v-3.31c0-.66.36-1.28.95-1.56 c.32-.15.67-.25,1.05-.28v.2l-1.36,1.02c-.4.3-.64.78-.64,1.28v9Z">
+								<Path.Fill>
+									<LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
+										<GradientStop Color="#F1E561" Offset="0"/>
+										<GradientStop Color="#F0D358" Offset="0.17"/>
+										<GradientStop Color="#EDA641" Offset="0.5"/>
+										<GradientStop Color="#EA5E1D" Offset="0.96"/>
+										<GradientStop Color="#EA591B" Offset="1"/>
+									</LinearGradientBrush>
+								</Path.Fill>
+							</Path>
+						</Grid>
+						<TextBlock TextWrapping="Wrap" Text="{Binding InstantBuildTool}" d:LayoutOverrides="Width, Height" Grid.Column="1" HorizontalAlignment="Right" FontSize="14.667" VerticalAlignment="Center"/>
                     </Grid>
                 </WrapPanel>
             </Border>
