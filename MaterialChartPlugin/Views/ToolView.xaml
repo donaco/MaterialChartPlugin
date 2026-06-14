@@ -218,9 +218,9 @@
 						</Path>
 						<TextBlock TextWrapping="Wrap" Text="{Binding RepairTool}" d:LayoutOverrides="Width, Height" Grid.Column="1" HorizontalAlignment="Right" FontSize="14.667" VerticalAlignment="Center"/>
                     </Grid>
-                    <Grid Margin="5,5,20,5" Height="24">
+                    <Grid Margin="5,5,20,5" Height="20">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="22.5"/>
+							<ColumnDefinition Width="22"/>
                             <ColumnDefinition Width="40"/>
                         </Grid.ColumnDefinitions>
 
