@@ -54,8 +54,9 @@ namespace MaterialChartPlugin.Models
         private IDisposable _isStartedSubscription;
         private IDisposable _materialsSubscription;
         private IDisposable _loggingSubscription;
+		private IDisposable _admiralSubscription;
 
-        public MaterialManager(MaterialChartPlugin plugin)
+		public MaterialManager(MaterialChartPlugin plugin)
         {
             this.plugin = plugin;
 
@@ -110,7 +111,16 @@ namespace MaterialChartPlugin.Models
                         }
                     });
 
-                this.IsAvailable = true;
+					// 自然回復上限
+					_admiralSubscription?.Dispose();
+					_admiralSubscription = Observable.FromEvent<PropertyChangedEventHandler, PropertyChangedEventArgs>(
+						h => (s, ea) => h(ea),
+						h => admiral.PropertyChanged += h,
+						h => admiral.PropertyChanged -= h)
+						.Where(ea => ea.PropertyName == nameof(admiral.Level))
+						.Subscribe(_ => this.OnPropertyChanged(nameof(StorableMaterialLimit)));
+
+					this.IsAvailable = true;
             });
         }
 
@@ -140,6 +150,7 @@ namespace MaterialChartPlugin.Models
             _isStartedSubscription?.Dispose();
             _materialsSubscription?.Dispose();
             _loggingSubscription?.Dispose();
-        }
+			_admiralSubscription?.Dispose();
+		}
     }
 }

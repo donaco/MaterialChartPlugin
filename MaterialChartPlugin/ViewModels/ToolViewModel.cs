@@ -96,8 +96,10 @@ namespace MaterialChartPlugin.ViewModels
 
         public int InstantBuildTool => materialManager.InstantBuildTool;
 
-        #region IsPopupMode変更通知プロパティ
-        private bool _IsPopupMode;
+		public int StorableLimit => materialManager.StorableMaterialLimit;
+
+		#region IsPopupMode変更通知プロパティ
+		private bool _IsPopupMode;
 
         public bool IsPopupMode
         {
@@ -339,6 +341,30 @@ namespace MaterialChartPlugin.ViewModels
         public ICommand ExportMaterialDataCommand { get; private set; }
         public ICommand ExportAsCsvCommand { get; private set; }
 
+        public ICommand ToggleFuelCommand { get; private set; }
+        public ICommand ToggleAmmunitionCommand { get; private set; }
+        public ICommand ToggleSteelCommand { get; private set; }
+        public ICommand ToggleBauxiteCommand { get; private set; }
+        public ICommand ToggleRepairToolCommand { get; private set; }
+        public ICommand ToggleInstantBuildToolCommand { get; private set; }
+        public ICommand ToggleStorableLimitCommand { get; private set; }
+
+        public bool ShowFuel => ChartSettings.ShowFuel.Value;
+        public bool ShowAmmunition => ChartSettings.ShowAmmunition.Value;
+        public bool ShowSteel => ChartSettings.ShowSteel.Value;
+        public bool ShowBauxite => ChartSettings.ShowBauxite.Value;
+        public bool ShowRepairTool => ChartSettings.ShowRepairTool.Value;
+        public bool ShowInstantBuildTool => ChartSettings.ShowInstantBuildTool.Value;
+        public bool ShowStorableLimit => ChartSettings.ShowStorableLimit.Value;
+
+        public Visibility FuelSeriesVisibility => ShowFuel ? Visibility.Visible : Visibility.Collapsed;
+        public Visibility AmmunitionSeriesVisibility => ShowAmmunition ? Visibility.Visible : Visibility.Collapsed;
+        public Visibility SteelSeriesVisibility => ShowSteel ? Visibility.Visible : Visibility.Collapsed;
+        public Visibility BauxiteSeriesVisibility => ShowBauxite ? Visibility.Visible : Visibility.Collapsed;
+        public Visibility RepairToolSeriesVisibility => ShowRepairTool ? Visibility.Visible : Visibility.Collapsed;
+        public Visibility InstantBuildToolSeriesVisibility => ShowInstantBuildTool ? Visibility.Visible : Visibility.Collapsed;
+        public Visibility StorableLimitSeriesVisibility => ShowStorableLimit ? Visibility.Visible : Visibility.Collapsed;
+
         public ToolViewModel(MaterialChartPlugin plugin)
         {
             try
@@ -363,7 +389,15 @@ namespace MaterialChartPlugin.ViewModels
                 ImportMaterialDataCommand = new ViewModelCommand(async () => await ImportMaterialData());
                 ExportMaterialDataCommand = new ViewModelCommand(async () => await ExportMaterialData());
                 ExportAsCsvCommand = new ViewModelCommand(async () => await ExportAsCsv());
-                
+
+                ToggleFuelCommand = new ViewModelCommand(() => ToggleSeriesVisibility(ChartSettings.ShowFuel, nameof(ShowFuel), nameof(FuelSeriesVisibility)));
+                ToggleAmmunitionCommand = new ViewModelCommand(() => ToggleSeriesVisibility(ChartSettings.ShowAmmunition, nameof(ShowAmmunition), nameof(AmmunitionSeriesVisibility)));
+                ToggleSteelCommand = new ViewModelCommand(() => ToggleSeriesVisibility(ChartSettings.ShowSteel, nameof(ShowSteel), nameof(SteelSeriesVisibility)));
+                ToggleBauxiteCommand = new ViewModelCommand(() => ToggleSeriesVisibility(ChartSettings.ShowBauxite, nameof(ShowBauxite), nameof(BauxiteSeriesVisibility)));
+                ToggleRepairToolCommand = new ViewModelCommand(() => ToggleSeriesVisibility(ChartSettings.ShowRepairTool, nameof(ShowRepairTool), nameof(RepairToolSeriesVisibility)));
+                ToggleInstantBuildToolCommand = new ViewModelCommand(() => ToggleSeriesVisibility(ChartSettings.ShowInstantBuildTool, nameof(ShowInstantBuildTool), nameof(InstantBuildToolSeriesVisibility)));
+                ToggleStorableLimitCommand = new ViewModelCommand(() => ToggleSeriesVisibility(ChartSettings.ShowStorableLimit, nameof(ShowStorableLimit), nameof(StorableLimitSeriesVisibility)));
+
                 System.Diagnostics.Debug.WriteLine("ToolViewModel: Constructor completed");
             }
             catch (Exception ex)
@@ -417,6 +451,10 @@ namespace MaterialChartPlugin.ViewModels
                                 RefleshData();
                                 this.OnPropertyChanged(nameof(DisplayedPeriod));
                             });
+                        }
+                        else if (e.PropertyName == nameof(materialManager.StorableMaterialLimit))
+                        {
+                            this.OnPropertyChanged(nameof(StorableLimit));
                         }
                     });
                 disposables.Add(_managerChangedSubscription);
@@ -630,6 +668,13 @@ namespace MaterialChartPlugin.ViewModels
             {
                 await materialManager.Log.ExportAsync(fileDialog.FileName);
             }
+        }
+
+        private void ToggleSeriesVisibility(SerializableProperty<bool> setting, string showPropertyName, string visibilityPropertyName)
+        {
+            setting.Value = !setting.Value;
+            this.OnPropertyChanged(showPropertyName);
+            this.OnPropertyChanged(visibilityPropertyName);
         }
 
         public void Dispose()
