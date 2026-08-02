@@ -311,8 +311,8 @@
 							</Grid.ColumnDefinitions>
 
 							<!-- 回復上限アイコン -->
-							<Path Data="M 5.3,13.5 L 8,13.6 L 8.9,11 L 11.3,16.8 L 13.6,8.4 L 15,13.7 L 19.2,13.7"
-								  Stroke="#FFEEEEEE"
+							<Path Data="M 5.2,13.7 L 8.9,13.7 L 10.7,19.2 L 13.6,8.4 L 15,13.7 L 19.2,13.7"
+								  Stroke="#FFBBBBBB"
 								  StrokeThickness="1.5"
 								  Stretch="Uniform"/>
 							<TextBlock Grid.Column="1" Text="{Binding StorableLimit}" HorizontalAlignment="Right" FontSize="14.667" VerticalAlignment="Center"/>
