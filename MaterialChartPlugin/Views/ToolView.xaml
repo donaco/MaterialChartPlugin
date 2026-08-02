@@ -186,7 +186,8 @@
         <StackPanel Margin="12,0,12,12">
             <Border BorderBrush="{DynamicResource BorderBrushKey}" BorderThickness="0,0,0,1" Padding="0,10" >
                 <WrapPanel VerticalAlignment="Top" Margin="0" HorizontalAlignment="Left">
-                    <ToggleButton Style="{StaticResource ResourceToggleButtonStyle}"
+					<!-- 資源アイコン -->
+					<ToggleButton Style="{StaticResource ResourceToggleButtonStyle}"
                                   IsChecked="{Binding ShowFuel, Mode=OneWay}"
                                   Command="{Binding ToggleFuelCommand}">
                         <Grid Margin="5,5,20,5" Height="18"
@@ -300,16 +301,20 @@
 						</Grid>
 					</ToggleButton>
 					<ToggleButton Style="{StaticResource ResourceToggleButtonStyle}"
-                                  IsChecked="{Binding ShowStorableLimit, Mode=OneWay}"
-                                  Command="{Binding ToggleStorableLimitCommand}">
+              IsChecked="{Binding ShowStorableLimit, Mode=OneWay}"
+              Command="{Binding ToggleStorableLimitCommand}">
 						<Grid Margin="5,5,20,5" Height="20"
-                              Opacity="{Binding ShowStorableLimit, Converter={StaticResource BoolToOpacityConverter}}">
+          Opacity="{Binding ShowStorableLimit, Converter={StaticResource BoolToOpacityConverter}}">
 							<Grid.ColumnDefinitions>
 								<ColumnDefinition Width="18"/>
 								<ColumnDefinition Width="50"/>
 							</Grid.ColumnDefinitions>
-							<Path Data="M4.7505285,10.814 L4.051,18.513998 23.651952,23.414 24.301,15.076499 z M4.001,10.826 L3.2508609,18.700815 1.8528846E-22,22.126 0.9502327,11.576433 z M3.8000442,19.378 L0.35,23.002497 24.900001,29.539 23.750494,24.377744 z M25.150684,15.427 L24.451,23.902295 25.4505,28.588999 26.351,17.177 z M13.181054,8.5639999 L33.131495,13.563743 34.281002,18.725 27.113,16.780667 25.731687,14.68 10.647224,11.225955 z M34.531683,4.6129998 L35.732,6.3629997 34.831501,17.774999 33.832001,13.088295 z M13.38201,0.012000175 L12.631871,7.8868144 9.6657693,11.011972 9.413,10.956862 10.331244,0.762433 z M14.131538,1.2969971E-07 L33.682001,4.2624992 33.032954,12.6 13.43201,7.6999972 z"
-                                  Fill="#FFC9C9C9" Stretch="Uniform"/>
+
+							<!-- 回復上限アイコン -->
+							<Path Data="M 5.3,13.5 L 8,13.6 L 8.9,11 L 11.3,16.8 L 13.6,8.4 L 15,13.7 L 19.2,13.7"
+								  Stroke="#FFEEEEEE"
+								  StrokeThickness="1.5"
+								  Stretch="Uniform"/>
 							<TextBlock Grid.Column="1" Text="{Binding StorableLimit}" HorizontalAlignment="Right" FontSize="14.667" VerticalAlignment="Center"/>
 						</Grid>
 					</ToggleButton>
