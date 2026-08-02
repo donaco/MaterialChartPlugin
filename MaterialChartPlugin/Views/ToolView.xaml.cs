@@ -1,18 +1,12 @@
 using System;
-using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.Windows.Controls.DataVisualization.Charting;
+using System.Windows.Controls.DataVisualization.Charting.Primitives;
 using MaterialChartPlugin.Models;
 using MaterialChartPlugin.ViewModels;
 
@@ -24,84 +18,143 @@ namespace MaterialChartPlugin.Views
     public partial class ToolView : UserControl
     {
         private ToolTip _chartToolTip;
+        private TextBlock _toolTipTitleBlock;
+        private TextBlock _toolTipDateBlock;
+        private TextBlock _toolTipValueBlock;
 
         public ToolView()
         {
             InitializeComponent();
 
+            _toolTipTitleBlock = new TextBlock
+            {
+                Foreground = Brushes.White,
+                FontWeight = FontWeights.Bold,
+                FontSize = 13,
+                Margin = new Thickness(8, 6, 8, 2)
+            };
+
+            _toolTipDateBlock = new TextBlock
+            {
+                Foreground = Brushes.LightGray,
+                FontSize = 12,
+                Margin = new Thickness(8, 2, 8, 2)
+            };
+
+            _toolTipValueBlock = new TextBlock
+            {
+                Foreground = Brushes.White,
+                FontSize = 14,
+                FontWeight = FontWeights.Bold,
+                Margin = new Thickness(8, 2, 8, 6)
+            };
+
+            var panel = new StackPanel
+            {
+                Orientation = Orientation.Vertical,
+                Background = new SolidColorBrush(Color.FromArgb(240, 50, 50, 50)),
+                Margin = new Thickness(0)
+            };
+
+            panel.Children.Add(_toolTipTitleBlock);
+            panel.Children.Add(_toolTipDateBlock);
+            panel.Children.Add(_toolTipValueBlock);
+
             _chartToolTip = new ToolTip
             {
+                Content = panel,
                 Placement = System.Windows.Controls.Primitives.PlacementMode.Mouse,
+                BorderBrush = Brushes.Gray,
+                BorderThickness = new Thickness(1),
+                Padding = new Thickness(0),
+                Background = Brushes.Transparent,
                 IsOpen = false
             };
         }
 
         /// <summary>
-        /// ビジュアルツリーから指定した型の子要素を探す
+        /// Chart テンプレート内のプロットエリア Grid を取得する
         /// </summary>
-        private T FindVisualChild<T>(DependencyObject parent) where T : DependencyObject
+        private Grid GetPlotArea(Chart chart)
         {
-            if (parent == null) return null;
+            if (chart == null) return null;
 
-            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+            chart.ApplyTemplate();
+
+            var chartArea = chart.Template?.FindName("ChartArea", chart) as EdgePanel;
+            if (chartArea == null) return null;
+
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(chartArea); i++)
             {
-                var child = VisualTreeHelper.GetChild(parent, i);
-                if (child is T result)
-                    return result;
+                var child = VisualTreeHelper.GetChild(chartArea, i) as Grid;
+                if (child == null) continue;
 
-                var childOfChild = FindVisualChild<T>(child);
-                if (childOfChild != null)
-                    return childOfChild;
+                // ToolView.xaml のテンプレートでは、
+                // プロットエリアの Grid に Panel.ZIndex = -1 が設定されている
+                if (Panel.GetZIndex(child) == -1)
+                {
+                    return child;
+                }
             }
+
             return null;
         }
 
         private void Chart_MouseMove(object sender, MouseEventArgs e)
         {
             var chart = sender as Chart;
-            if (chart == null || this.DataContext == null) return;
-
-            var viewModel = this.DataContext as ToolViewModel;
-            if (viewModel == null) return;
+            if (chart == null)
+            {
+                HideToolTip();
+                return;
+            }
 
             try
             {
-                // プロットエリアの座標を取得
-                var plotArea = FindVisualChild<Grid>(chart);
-                if (plotArea == null) return;
+                var plotArea = GetPlotArea(chart);
+                if (plotArea == null)
+                {
+                    HideToolTip();
+                    return;
+                }
 
                 var mousePos = e.GetPosition(plotArea);
 
-                // 軸を取得
                 var xAxis = chart.Axes.OfType<DateTimeAxis>().FirstOrDefault(a => a.Orientation == AxisOrientation.X);
                 var yAxis = chart.Axes.OfType<LinearAxis>().FirstOrDefault(a => a.Orientation == AxisOrientation.Y);
 
-                if (xAxis == null || yAxis == null) return;
+                if (xAxis == null || yAxis == null)
+                {
+                    HideToolTip();
+                    return;
+                }
 
-                // すべての系列からヒットテスト
-                var hitResult = FindNearestPoint(chart, viewModel, xAxis, yAxis, plotArea, mousePos);
+                var hitResult = FindNearestPoint(chart, xAxis, yAxis, plotArea, mousePos);
 
                 if (hitResult != null)
                 {
-                    // ツールチップを表示
                     ShowToolTip(hitResult);
                 }
                 else
                 {
-                    _chartToolTip.IsOpen = false;
+                    HideToolTip();
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                _chartToolTip.IsOpen = false;
+                Debug.WriteLine($"[MaterialChartPlugin] Chart_MouseMove failed: {ex}");
+                HideToolTip();
             }
         }
 
         /// <summary>
         /// マウス位置に最も近いデータポイントを探す
         /// </summary>
-        private HitTestResult FindNearestPoint(Chart chart, ToolViewModel viewModel, 
-            DateTimeAxis xAxis, LinearAxis yAxis, Grid plotArea, Point mousePos)
+        private HitTestResult FindNearestPoint(Chart chart,
+            DateTimeAxis xAxis,
+            LinearAxis yAxis,
+            Grid plotArea,
+            Point mousePos)
         {
             const double maxDistanceX = 20.0; // X方向の許容距離（ピクセル）
 
@@ -172,10 +225,7 @@ namespace MaterialChartPlugin.Views
 
         private void Chart_MouseLeave(object sender, MouseEventArgs e)
         {
-            if (_chartToolTip != null)
-            {
-                _chartToolTip.IsOpen = false;
-            }
+            HideToolTip();
         }
 
         /// <summary>
@@ -185,52 +235,12 @@ namespace MaterialChartPlugin.Views
         {
             if (hitResult == null || _chartToolTip == null) return;
 
-            var panel = new StackPanel
-            {
-                Orientation = Orientation.Vertical,
-                Background = new SolidColorBrush(Color.FromArgb(240, 50, 50, 50)),
-                Margin = new Thickness(0)
-            };
-
-            // 系列名
-            var titleBlock = new TextBlock
-            {
-                Text = hitResult.SeriesTitle,
-                Foreground = Brushes.White,
-                FontWeight = FontWeights.Bold,
-                FontSize = 13,
-                Margin = new Thickness(8, 6, 8, 2)
-            };
-            panel.Children.Add(titleBlock);
-
-            // 日時
-            var dateBlock = new TextBlock
-            {
-                Text = hitResult.DateTime.ToString("yyyy/MM/dd HH:mm"),
-                Foreground = Brushes.LightGray,
-                FontSize = 12,
-                Margin = new Thickness(8, 2, 8, 2)
-            };
-            panel.Children.Add(dateBlock);
-
-            // 値
-            var valueBlock = new TextBlock
-            {
-                Text = ((int)hitResult.Value).ToString("N0"),
-                Foreground = Brushes.White,
-                FontSize = 14,
-                FontWeight = FontWeights.Bold,
-                Margin = new Thickness(8, 2, 8, 6)
-            };
-            panel.Children.Add(valueBlock);
+            _toolTipTitleBlock.Text = hitResult.SeriesTitle;
+            _toolTipDateBlock.Text = hitResult.DateTime.ToString("yyyy/MM/dd HH:mm");
+            _toolTipValueBlock.Text = ((int)hitResult.Value).ToString("N0");
 
             // ツールチップに設定
-            _chartToolTip.Content = panel;
-            _chartToolTip.BorderBrush = Brushes.Gray;
-            _chartToolTip.BorderThickness = new Thickness(1);
-            _chartToolTip.Padding = new Thickness(0);
-            _chartToolTip.Background = Brushes.Transparent;
-			_chartToolTip.PlacementTarget = this;
+            _chartToolTip.PlacementTarget = this;
 
 			if (!_chartToolTip.IsOpen)
 			{
@@ -242,6 +252,14 @@ namespace MaterialChartPlugin.Views
 				// オフセットを微小に変化させてマウスに追従させる
 				_chartToolTip.HorizontalOffset = _chartToolTip.HorizontalOffset == 0 ? 0.01 : 0;
 			}
-		}
+        }
+
+        private void HideToolTip()
+        {
+            if (_chartToolTip != null)
+            {
+                _chartToolTip.IsOpen = false;
+            }
+        }
     }
 }
