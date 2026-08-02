@@ -96,7 +96,7 @@
                 <Setter Property="PlotAreaStyle">
                     <Setter.Value>
                         <Style TargetType="{x:Type Grid}">
-                            <Setter Property="Background" Value="{x:Null}"/>
+                            <Setter Property="Background" Value="Transparent"/>
                         </Style>
                     </Setter.Value>
                 </Setter>
@@ -348,7 +348,9 @@
                 </StackPanel>
             </Grid>
 
-            <chartingToolkit:Chart Height="200" Style="{DynamicResource MaterialChartStyle}" Margin="0,20,0,0" >
+            <chartingToolkit:Chart x:Name="MaterialChart" Height="200" Style="{DynamicResource MaterialChartStyle}" Margin="0,20,0,0" 
+                                   MouseMove="Chart_MouseMove" MouseLeave="Chart_MouseLeave"
+                                   ToolTipService.InitialShowDelay="0" ToolTipService.ShowDuration="60000" ToolTipService.BetweenShowDelay="0">
                 <chartingToolkit:Chart.Axes>
                     <chartingToolkit:DateTimeAxis Orientation="X" Minimum="{Binding XMin}" Maximum="{Binding XMax}" MajorTickMarkStyle="{DynamicResource MajorTickStyle}" Location="Bottom" AxisLabelStyle="{StaticResource DateTimeAxisLabelStyle}" GridLineStyle="{DynamicResource GridLineStyle}" ShowGridLines="True" />
                     <chartingToolkit:LinearAxis Orientation="Y" Minimum="0" Maximum="{Binding YMax1}" MajorTickMarkStyle="{DynamicResource MajorTickStyle}" Location="Left" ShowGridLines="True" GridLineStyle="{DynamicResource GridLineStyle}" MinWidth="40"/>
@@ -364,7 +366,9 @@
                 <chartingToolkit:LineSeries DependentValuePath="Y" IndependentValuePath="X" ItemsSource="{Binding StorableLimitSeries}" Title="回復上限" Style="{DynamicResource SimpleLineSeriesStyle}" BorderBrush="#FF4E3876"
                                             Visibility="{Binding StorableLimitSeriesVisibility}"/>
             </chartingToolkit:Chart>
-            <chartingToolkit:Chart Height="200" Style="{DynamicResource MaterialChartStyle}" Margin="0,25,0,0" >
+            <chartingToolkit:Chart x:Name="ConsumableChart" Height="200" Style="{DynamicResource MaterialChartStyle}" Margin="0,25,0,0" 
+                                   MouseMove="Chart_MouseMove" MouseLeave="Chart_MouseLeave"
+                                   ToolTipService.InitialShowDelay="0" ToolTipService.ShowDuration="60000" ToolTipService.BetweenShowDelay="0">
                 <chartingToolkit:Chart.Axes>
                     <chartingToolkit:DateTimeAxis Orientation="X" Minimum="{Binding XMin}" Maximum="{Binding XMax}" MajorTickMarkStyle="{DynamicResource MajorTickStyle}" Location="Bottom" AxisLabelStyle="{StaticResource DateTimeAxisLabelStyle}" GridLineStyle="{DynamicResource GridLineStyle}" ShowGridLines="True"/>
                     <chartingToolkit:LinearAxis Orientation="Y" Minimum="0" Maximum="{Binding YMax2}" MajorTickMarkStyle="{DynamicResource MajorTickStyle}" Location="Left" GridLineStyle="{DynamicResource GridLineStyle}" ShowGridLines="True" MinWidth="40"/>
