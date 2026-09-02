@@ -201,8 +201,6 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <Analyzer Include="$(SolutionDir)\Analyzers\KanColleViewer.PluginAnalyzer\bin\$(Configuration)\KanColleViewer.Composition.dll" />
-    <Analyzer Include="$(SolutionDir)\Analyzers\KanColleViewer.PluginAnalyzer\bin\$(Configuration)\KanColleViewer.PluginAnalyzer.dll" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\Grabacr07.KanColleViewer.Composition\KanColleViewer.Composition.csproj">
