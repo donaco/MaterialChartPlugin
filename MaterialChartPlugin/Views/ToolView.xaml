@@ -7,7 +7,6 @@
              xmlns:converters="clr-namespace:MaterialChartPlugin.Views.Converters"
              xmlns:ViewModels="clr-namespace:MaterialChartPlugin.ViewModels" xmlns:Custom="http://schemes.grabacr.net/winfx/2014/controls"
              xmlns:settings="clr-namespace:MaterialChartPlugin.Models.Settings"
-             xmlns:sparrowToolkit="http://sparrowtoolkit.codeplex.com/wpf"
              xmlns:chartingToolkit="clr-namespace:System.Windows.Controls.DataVisualization.Charting;assembly=System.Windows.Controls.DataVisualization.Toolkit"
              xmlns:visualizationToolkit="clr-namespace:System.Windows.Controls.DataVisualization;assembly=System.Windows.Controls.DataVisualization.Toolkit"
              xmlns:Primitives="clr-namespace:System.Windows.Controls.DataVisualization.Charting.Primitives;assembly=System.Windows.Controls.DataVisualization.Toolkit" x:Class="MaterialChartPlugin.Views.ToolView"
