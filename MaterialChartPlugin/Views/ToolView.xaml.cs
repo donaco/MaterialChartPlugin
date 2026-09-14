@@ -162,19 +162,19 @@ namespace MaterialChartPlugin.Views
             double minDistance = double.MaxValue;
 
             // すべての系列をチェック
-            var allSeries = chart.Series.OfType<DataPointSeries>().ToList();
-
-            foreach (var series in allSeries)
+            foreach (var seriesItem in chart.Series)
             {
+                if (seriesItem is not DataPointSeries series) continue;
+
                 // 非表示の系列はスキップ
                 if (series.Visibility != Visibility.Visible) continue;
 
                 var itemsSource = series.ItemsSource as System.Collections.IEnumerable;
                 if (itemsSource == null) continue;
 
-                foreach (var item in itemsSource)
+                foreach (var chartItem in itemsSource)
                 {
-                    var chartPoint = item as ChartPoint;
+                    var chartPoint = chartItem as ChartPoint;
                     if (chartPoint == null) continue;
 
                     // データポイントを画面座標に変換
