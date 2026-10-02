@@ -99,225 +99,199 @@ namespace MaterialChartPlugin.ViewModels
 		public int StorableLimit => materialManager.StorableMaterialLimit;
 
 		#region IsPopupMode変更通知プロパティ
-		private bool _IsPopupMode;
-
         public bool IsPopupMode
         {
             get
-            { return _IsPopupMode; }
+            { return field; }
             set
             {
-                if (_IsPopupMode == value)
+                if (field == value)
                     return;
-                _IsPopupMode = value;
+                field = value;
                 this.OnPropertyChanged();
             }
         }
         #endregion
 
         #region IsTopMost変更通知プロパティ
-        private bool _IsTopMost;
-
         public bool IsTopMost
         {
             get
-            { return _IsTopMost; }
+            { return field; }
             set
             {
-                if (_IsTopMost == value)
+                if (field == value)
                     return;
-                _IsTopMost = value;
+                field = value;
                 this.OnPropertyChanged();
             }
         }
         #endregion
 
         #region FuelSeries変更通知プロパティ
-        private ObservableCollection<ChartPoint> _FuelSeries = new ObservableCollection<ChartPoint>();
-
         public ObservableCollection<ChartPoint> FuelSeries
         {
             get
-            { return _FuelSeries; }
+            { return field; }
             set
             {
-                if (_FuelSeries == value)
+                if (field == value)
                     return;
-                _FuelSeries = value;
+                field = value;
                 this.OnPropertyChanged();
             }
-        }
+        } = new ObservableCollection<ChartPoint>();
         #endregion
 
         #region AmmunitionSeries変更通知プロパティ
-        private ObservableCollection<ChartPoint> _AmmunitionSeries = new ObservableCollection<ChartPoint>();
-
         public ObservableCollection<ChartPoint> AmmunitionSeries
         {
             get
-            { return _AmmunitionSeries; }
+            { return field; }
             set
             {
-                if (_AmmunitionSeries == value)
+                if (field == value)
                     return;
-                _AmmunitionSeries = value;
+                field = value;
                 this.OnPropertyChanged();
             }
-        }
+        } = new ObservableCollection<ChartPoint>();
         #endregion
 
         #region SteelSeries変更通知プロパティ
-        private ObservableCollection<ChartPoint> _SteelSeries = new ObservableCollection<ChartPoint>();
-
         public ObservableCollection<ChartPoint> SteelSeries
         {
             get
-            { return _SteelSeries; }
+            { return field; }
             set
             {
-                if (_SteelSeries == value)
+                if (field == value)
                     return;
-                _SteelSeries = value;
+                field = value;
                 this.OnPropertyChanged();
             }
-        }
+        } = new ObservableCollection<ChartPoint>();
         #endregion
 
         #region BauxiteSeries変更通知プロパティ
-        private ObservableCollection<ChartPoint> _BauxiteSeries = new ObservableCollection<ChartPoint>();
-
         public ObservableCollection<ChartPoint> BauxiteSeries
         {
             get
-            { return _BauxiteSeries; }
+            { return field; }
             set
             {
-                if (_BauxiteSeries == value)
+                if (field == value)
                     return;
-                _BauxiteSeries = value;
+                field = value;
                 this.OnPropertyChanged();
             }
-        }
+        } = new ObservableCollection<ChartPoint>();
         #endregion
 
 
         #region RepairToolSeries変更通知プロパティ
-        private ObservableCollection<ChartPoint> _RepairToolSeries = new ObservableCollection<ChartPoint>();
-
         public ObservableCollection<ChartPoint> RepairToolSeries
         {
             get
-            { return _RepairToolSeries; }
+            { return field; }
             set
             {
-                if (_RepairToolSeries == value)
+                if (field == value)
                     return;
-                _RepairToolSeries = value;
+                field = value;
                 this.OnPropertyChanged();
             }
-        }
+        } = new ObservableCollection<ChartPoint>();
         #endregion
 
         #region InstantBuildToolSeries変更通知プロパティ
-        private ObservableCollection<ChartPoint> _InstantBuildToolSeries = new ObservableCollection<ChartPoint>();
-
         public ObservableCollection<ChartPoint> InstantBuildToolSeries
         {
             get
-            { return _InstantBuildToolSeries; }
+            { return field; }
             set
             {
-                if (_InstantBuildToolSeries == value)
+                if (field == value)
                     return;
-                _InstantBuildToolSeries = value;
+                field = value;
                 this.OnPropertyChanged();
             }
-        }
+        } = new ObservableCollection<ChartPoint>();
         #endregion
 
         #region StorableLimitSeries変更通知プロパティ
-        private ObservableCollection<ChartPoint> _StorableLimitSeries;
-
         public ObservableCollection<ChartPoint> StorableLimitSeries
         {
             get
-            { return _StorableLimitSeries; }
+            { return field; }
             set
             {
-                if (_StorableLimitSeries == value)
+                if (field == value)
                     return;
-                _StorableLimitSeries = value;
+                field = value;
                 this.OnPropertyChanged();
             }
         }
         #endregion
 
         #region XMin変更通知プロパティ
-        private DateTime _XMin = DateTime.Now - TimeSpan.FromDays(1);
-
         public DateTime XMin
         {
             get
-            { return _XMin; }
+            { return field; }
             set
             {
-                if (_XMin == value)
+                if (field == value)
                     return;
-                _XMin = value;
+                field = value;
                 this.OnPropertyChanged();
             }
-        }
+        } = DateTime.Now - TimeSpan.FromDays(1);
         #endregion
 
         #region XMax変更通知プロパティ
-        private DateTime _XMax = DateTime.Now;
-
         public DateTime XMax
         {
             get
-            { return _XMax; }
+            { return field; }
             set
             {
-                if (_XMax == value)
+                if (field == value)
                     return;
-                _XMax = value;
+                field = value;
                 this.OnPropertyChanged();
             }
-        }
+        } = DateTime.Now;
         #endregion
 
         #region YMax1変更通知プロパティ
-        private double _YMax1 = 1000;
-
         public double YMax1
         {
             get
-            { return _YMax1; }
+            { return field; }
             set
             {
-                if (_YMax1 == value)
+                if (field == value)
                     return;
-                _YMax1 = value;
+                field = value;
                 this.OnPropertyChanged();
             }
-        }
+        } = 1000;
         #endregion
 
         #region YMax2変更通知プロパティ
-        private double _YMax2 = 100;
-
         public double YMax2
         {
             get
-            { return _YMax2; }
+            { return field; }
             set
             {
-                if (_YMax2 == value)
+                if (field == value)
                     return;
-                _YMax2 = value;
+                field = value;
                 this.OnPropertyChanged();
             }
-        }
+        } = 100;
         #endregion
 
         public DisplayedPeriod DisplayedPeriod => ChartSettings.DisplayedPeriod.Value;
