@@ -35,17 +35,14 @@ namespace MaterialChartPlugin.Models
         public MaterialLog Log { get; private set; }
 
         #region IsAvailable変更通知プロパティ
-        private bool _IsAvailable = false;
-
         public bool IsAvailable
         {
-            get
-            { return _IsAvailable; }
+            get { return field; }
             set
-            { 
-                if (_IsAvailable == value)
+            {
+                if (field == value)
                     return;
-                _IsAvailable = value;
+                field = value;
                 this.OnPropertyChanged();
             }
         }
@@ -105,9 +102,9 @@ namespace MaterialChartPlugin.Models
                     {
                         if (Log.HasLoaded)
                         {
-                            Log.History.Add(new TimeMaterialsPair(DateTime.Now, Fuel, Ammunition, Steel, Bauxite, RepairTool,
-                                materials.DevelopmentMaterials, materials.InstantBuildMaterials, materials.ImprovementMaterials));
-                            Log.SaveAsync().ConfigureAwait(false);
+                            if (Log.AddHistory(new TimeMaterialsPair(DateTime.Now, Fuel, Ammunition, Steel, Bauxite, RepairTool,
+                                materials.DevelopmentMaterials, materials.InstantBuildMaterials, materials.ImprovementMaterials)))
+                                _ = Log.SaveAsync();
                         }
                     });
 

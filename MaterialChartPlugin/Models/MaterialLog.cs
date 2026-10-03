@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Runtime.Serialization;
+using System.Threading;
 using System.Xml;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Grabacr07.KanColleWrapper;
@@ -28,7 +29,9 @@ namespace MaterialChartPlugin.Models
 
         private MaterialChartPlugin plugin;
 
-        private readonly object _saveLock = new object();
+        private readonly object _historyLock = new();
+
+        private readonly SemaphoreSlim _writeSemaphore = new(1, 1);
 
         private bool _isDisposed = false;
 
@@ -36,17 +39,14 @@ namespace MaterialChartPlugin.Models
             new DataContractSerializer(typeof(List<TimeMaterialsPair>));
 
         #region HasLoaded変更通知プロパティ
-        private bool _HasLoaded = false;
-
         public bool HasLoaded
         {
-            get
-            { return _HasLoaded; }
+            get { return field; }
             set
-            { 
-                if (_HasLoaded == value)
+            {
+                if (field == value)
                     return;
-                _HasLoaded = value;
+                field = value;
                 this.OnPropertyChanged();
             }
         }
@@ -64,9 +64,13 @@ namespace MaterialChartPlugin.Models
             await LoadAsync(SaveFilePath, null);
         }
 
-        private async Task LoadAsync(string filePath, Action onSuccess)
+        private async Task LoadAsync(string filePath, Func<Task> onSuccess)
         {
-            this.HasLoaded = false;
+            lock (_historyLock)
+            {
+                if (_isDisposed) return;
+                this.HasLoaded = false;
+            }
 
             if (File.Exists(filePath))
             {
@@ -81,8 +85,9 @@ namespace MaterialChartPlugin.Models
                         }
                     });
 
-                    this.History = new ObservableCollection<TimeMaterialsPair>(list);
-                    onSuccess?.Invoke();
+                    SetHistory(list);
+                    if (onSuccess is not null)
+                        await onSuccess();
                 }
                 catch (SerializationException ex)
                 {
@@ -100,7 +105,7 @@ namespace MaterialChartPlugin.Models
                         System.Diagnostics.Debug.WriteLine($"MaterialLog: Failed to rename old file - {ioEx.Message}");
                     }
 
-                    this.History = new ObservableCollection<TimeMaterialsPair>();
+                    SetHistory(Array.Empty<TimeMaterialsPair>());
                 }
                 catch (Exception ex)
                 {
@@ -108,17 +113,21 @@ namespace MaterialChartPlugin.Models
                         "MaterialChartPlugin.LoadFailed", "読み込み失敗",
                         "資材データの読み込みに失敗しました。データが破損しているか、形式が古い可能性があります。"));
                     System.Diagnostics.Debug.WriteLine($"MaterialLog: Load exception - {ex}");
-                    if (this.History == null)
-                        this.History = new ObservableCollection<TimeMaterialsPair>();
+                    if (History is null)
+                        SetHistory(Array.Empty<TimeMaterialsPair>());
                 }
             }
             else
             {
-                if (this.History == null)
-                    this.History = new ObservableCollection<TimeMaterialsPair>();
+                if (History is null)
+                    SetHistory(Array.Empty<TimeMaterialsPair>());
             }
 
-            this.HasLoaded = true;
+            lock (_historyLock)
+            {
+                if (!_isDisposed)
+                    this.HasLoaded = true;
+            }
         }
 
         public async Task SaveAsync()
@@ -138,25 +147,27 @@ namespace MaterialChartPlugin.Models
 
         private async Task SaveAsync(string directoryPath, string filePath, Action onSuccess)
         {
-            if (!Directory.Exists(directoryPath))
+            await _writeSemaphore.WaitAsync();
+            try
             {
-                Directory.CreateDirectory(directoryPath);
-            }
+                if (!Directory.Exists(directoryPath))
+                    Directory.CreateDirectory(directoryPath);
 
-            List<TimeMaterialsPair> snapshot;
-            lock (_saveLock)
-            {
-                snapshot = History.ToList();
-            }
+                var snapshot = GetHistoryListSnapshot();
 
-            await Task.Run(() =>
-            {
-                using (var stream = new FileStream(filePath, FileMode.Create, FileAccess.Write))
-                using (var writer = XmlDictionaryWriter.CreateBinaryWriter(stream))
+                await Task.Run(() =>
                 {
-                    serializer.WriteObject(writer, snapshot);
-                }
-            });
+                    using (var stream = new FileStream(filePath, FileMode.Create, FileAccess.Write))
+                    using (var writer = XmlDictionaryWriter.CreateBinaryWriter(stream))
+                    {
+                        serializer.WriteObject(writer, snapshot);
+                    }
+                });
+            }
+            finally
+            {
+                _writeSemaphore.Release();
+            }
 
             onSuccess?.Invoke();
         }
@@ -177,7 +188,7 @@ namespace MaterialChartPlugin.Models
                 {
                     await writer.WriteLineAsync("時刻,燃料,弾薬,鋼材,ボーキサイト,高速修復材,開発資材,高速建造材,改修資材");
 
-                    foreach (var pair in History)
+                    foreach (var pair in GetHistoryListSnapshot())
                     {
                         await writer.WriteLineAsync($"{pair.DateTime},{pair.Fuel},{pair.Ammunition},{pair.Steel},{pair.Bauxite},{pair.RepairTool},{pair.DevelopmentTool},{pair.InstantBuildTool},{pair.ImprovementTool}");
                     }
@@ -219,7 +230,7 @@ namespace MaterialChartPlugin.Models
                 {
                     await writer.WriteLineAsync("時刻,燃料,弾薬,鋼材,ボーキサイト,高速修復材,開発資材,高速建造材,改修資材");
 
-                    foreach (var pair in History)
+                foreach (var pair in GetHistoryListSnapshot())
                     {
                         await writer.WriteLineAsync($"{pair.DateTime},{pair.Fuel},{pair.Ammunition},{pair.Steel},{pair.Bauxite},{pair.RepairTool},{pair.DevelopmentTool},{pair.InstantBuildTool},{pair.ImprovementTool}");
                     }
@@ -260,7 +271,7 @@ namespace MaterialChartPlugin.Models
                         "資材データのインポートに成功しました。"));
 
                     var materials = KanColleClient.Current.Homeport.Materials;
-                    History.Add(new TimeMaterialsPair(DateTime.Now, materials.Fuel, materials.Ammunition, materials.Steel,
+                    AddHistory(new TimeMaterialsPair(DateTime.Now, materials.Fuel, materials.Ammunition, materials.Steel,
                         materials.Bauxite, materials.InstantRepairMaterials, materials.DevelopmentMaterials,
                         materials.InstantBuildMaterials, materials.ImprovementMaterials));
 
@@ -377,12 +388,58 @@ namespace MaterialChartPlugin.Models
 
         public void Dispose()
         {
-            if (_isDisposed) return;
-            _isDisposed = true;
+            lock (_historyLock)
+            {
+                if (_isDisposed) return;
+                _isDisposed = true;
+                HasLoaded = false;
+            }
+        }
 
-            // Dispose後にバックグラウンドからSaveAsync/History.Addが呼ばれないようにガード
-            HasLoaded = false;
-            History?.Clear();
+        public bool AddHistory(TimeMaterialsPair data)
+        {
+            lock (_historyLock)
+            {
+                if (_isDisposed || History is null) return false;
+                History.Add(data);
+                return true;
+            }
+        }
+
+        private void SetHistory(IEnumerable<TimeMaterialsPair> data)
+        {
+            lock (_historyLock)
+            {
+                if (_isDisposed) return;
+
+                if (History is null)
+                {
+                    History = new ObservableCollection<TimeMaterialsPair>(data);
+                    return;
+                }
+
+                History.Clear();
+                foreach (var item in data)
+                    History.Add(item);
+            }
+        }
+
+        public TimeMaterialsPair[] GetHistorySnapshot()
+        {
+            lock (_historyLock)
+                return History?.ToArray() ?? Array.Empty<TimeMaterialsPair>();
+        }
+
+        public TimeMaterialsPair GetLatestHistoryEntry()
+        {
+            lock (_historyLock)
+                return History is { Count: > 0 } ? History[^1] : null;
+        }
+
+        private List<TimeMaterialsPair> GetHistoryListSnapshot()
+        {
+            lock (_historyLock)
+                return History?.ToList() ?? new List<TimeMaterialsPair>();
         }
     }
 }

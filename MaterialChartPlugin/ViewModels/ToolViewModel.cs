@@ -409,28 +409,7 @@ namespace MaterialChartPlugin.ViewModels
                     h => (s, e) => h(e),
                     h => materialManager.PropertyChanged += h,
                     h => materialManager.PropertyChanged -= h)
-                    .Subscribe(e =>
-                    {
-                        if (e.PropertyName == nameof(materialManager.Fuel)) this.OnPropertyChanged(nameof(Fuel));
-                        else if (e.PropertyName == nameof(materialManager.Ammunition)) this.OnPropertyChanged(nameof(Ammunition));
-                        else if (e.PropertyName == nameof(materialManager.Steel)) this.OnPropertyChanged(nameof(Steel));
-                        else if (e.PropertyName == nameof(materialManager.Bauxite)) this.OnPropertyChanged(nameof(Bauxite));
-                        else if (e.PropertyName == nameof(materialManager.RepairTool)) this.OnPropertyChanged(nameof(RepairTool));
-                        else if (e.PropertyName == nameof(materialManager.InstantBuildTool)) this.OnPropertyChanged(nameof(InstantBuildTool));
-                        else if (e.PropertyName == nameof(materialManager.IsAvailable))
-                        {
-                            _displayedPeriodSubscription?.Dispose();
-                            _displayedPeriodSubscription = ChartSettings.DisplayedPeriod.Subscribe(___ =>
-                            {
-                                RefleshData();
-                                this.OnPropertyChanged(nameof(DisplayedPeriod));
-                            });
-                        }
-                        else if (e.PropertyName == nameof(materialManager.StorableMaterialLimit))
-                        {
-                            this.OnPropertyChanged(nameof(StorableLimit));
-                        }
-                    });
+                    .Subscribe(e => InvokeOnUiThread(() => HandleManagerPropertyChanged(e)));
                 disposables.Add(_managerChangedSubscription);
                 disposables.Add(materialManager);
 
@@ -439,7 +418,12 @@ namespace MaterialChartPlugin.ViewModels
                     (h => (sender, e) => h(e), h => history.CollectionChanged += h, h => history.CollectionChanged -= h)
                     .Where(_ => materialManager.Log.HasLoaded)
                     .Throttle(TimeSpan.FromMilliseconds(10))
-                    .Subscribe(_ => UpdateData(history.Last())));
+                    .Subscribe(_ => InvokeOnUiThread(() =>
+                    {
+                        var latest = materialManager.Log.GetLatestHistoryEntry();
+                        if (latest is not null)
+                            UpdateData(latest);
+                    })));
                     
                 System.Diagnostics.Debug.WriteLine("ToolViewModel: Initialize completed");
             }
@@ -447,6 +431,29 @@ namespace MaterialChartPlugin.ViewModels
             {
                 System.Diagnostics.Debug.WriteLine($"ToolViewModel Initialize failed: {ex}");
                 throw; // Taskに例外を乗せて呼び元に伝播する
+            }
+        }
+
+        private void HandleManagerPropertyChanged(PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(materialManager.Fuel)) this.OnPropertyChanged(nameof(Fuel));
+            else if (e.PropertyName == nameof(materialManager.Ammunition)) this.OnPropertyChanged(nameof(Ammunition));
+            else if (e.PropertyName == nameof(materialManager.Steel)) this.OnPropertyChanged(nameof(Steel));
+            else if (e.PropertyName == nameof(materialManager.Bauxite)) this.OnPropertyChanged(nameof(Bauxite));
+            else if (e.PropertyName == nameof(materialManager.RepairTool)) this.OnPropertyChanged(nameof(RepairTool));
+            else if (e.PropertyName == nameof(materialManager.InstantBuildTool)) this.OnPropertyChanged(nameof(InstantBuildTool));
+            else if (e.PropertyName == nameof(materialManager.IsAvailable))
+            {
+                _displayedPeriodSubscription?.Dispose();
+                _displayedPeriodSubscription = ChartSettings.DisplayedPeriod.Subscribe(_ => InvokeOnUiThread(() =>
+                {
+                    RefleshData();
+                    this.OnPropertyChanged(nameof(DisplayedPeriod));
+                }));
+            }
+            else if (e.PropertyName == nameof(materialManager.StorableMaterialLimit))
+            {
+                this.OnPropertyChanged(nameof(StorableLimit));
             }
         }
 
@@ -476,10 +483,13 @@ namespace MaterialChartPlugin.ViewModels
         /// <param name="newData"></param>
         public void UpdateData(TimeMaterialsPair newData)
         {
-            SetXAxis(newData);
-            SetMaterialYAxis(Math.Max(this.mostMaterial, newData.MostMaterial));
-            SetRepairToolYAxis(Math.Max(this.mostRepairTool, Math.Max(newData.RepairTool, newData.InstantBuildTool)));
-            AddChartData(newData);
+            InvokeOnUiThread(() =>
+            {
+                SetXAxis(newData);
+                SetMaterialYAxis(Math.Max(this.mostMaterial, newData.MostMaterial));
+                SetRepairToolYAxis(Math.Max(this.mostRepairTool, Math.Max(newData.RepairTool, newData.InstantBuildTool)));
+                AddChartData(newData);
+            });
         }
 
         /// <summary>
@@ -487,35 +497,36 @@ namespace MaterialChartPlugin.ViewModels
         /// </summary>
         public void RefleshData()
         {
-            // 描画すべきデータがなかったら何もしない
-            if (materialManager.Log.History
-                .Within(ChartSettings.DisplayedPeriod)
-                .ThinOut(ChartSettings.DisplayedPeriod).Count() == 0)
-                return;
-
-            var neededData = materialManager.Log.History
-                .Within(ChartSettings.DisplayedPeriod)
-                .ThinOut(ChartSettings.DisplayedPeriod)
+            var period = ChartSettings.DisplayedPeriod.Value;
+            var neededData = materialManager.Log.GetHistorySnapshot()
+                .Within(period)
+                .ThinOut(period)
                 .ToArray();
 
-            SetXAxis(neededData[neededData.Length - 1]);
-            SetMaterialYAxis(neededData.Max(p => p.MostMaterial));
-            SetRepairToolYAxis(neededData.Max(p => Math.Max(p.RepairTool, p.InstantBuildTool)));
-            RefleshChartData(neededData);
+            // 描画すべきデータがなかったら何もしない
+            if (neededData.Length == 0)
+                return;
+
+            var mostMaterial = neededData.Max(p => p.MostMaterial);
+            var mostRepairTool = neededData.Max(p => Math.Max(p.RepairTool, p.InstantBuildTool));
+
+            InvokeOnUiThread(() =>
+            {
+                SetXAxis(neededData[neededData.Length - 1]);
+                SetMaterialYAxis(mostMaterial);
+                SetRepairToolYAxis(mostRepairTool);
+                RefleshChartData(neededData);
+            });
         }
 
         private void AddChartData(TimeMaterialsPair data)
         {
-            Application.Current.Dispatcher.Invoke(
-                () =>
-                {
-                    FuelSeries.Add(new ChartPoint(data.DateTime, data.Fuel));
-                    AmmunitionSeries.Add(new ChartPoint(data.DateTime, data.Ammunition));
-                    SteelSeries.Add(new ChartPoint(data.DateTime, data.Steel));
-                    BauxiteSeries.Add(new ChartPoint(data.DateTime, data.Bauxite));
-                    RepairToolSeries.Add(new ChartPoint(data.DateTime, data.RepairTool));
-                    InstantBuildToolSeries.Add(new ChartPoint(data.DateTime, data.InstantBuildTool));
-                });
+            FuelSeries.Add(new ChartPoint(data.DateTime, data.Fuel));
+            AmmunitionSeries.Add(new ChartPoint(data.DateTime, data.Ammunition));
+            SteelSeries.Add(new ChartPoint(data.DateTime, data.Steel));
+            BauxiteSeries.Add(new ChartPoint(data.DateTime, data.Bauxite));
+            RepairToolSeries.Add(new ChartPoint(data.DateTime, data.RepairTool));
+            InstantBuildToolSeries.Add(new ChartPoint(data.DateTime, data.InstantBuildTool));
 
             var currentDateTime = data.DateTime;
 
@@ -532,33 +543,30 @@ namespace MaterialChartPlugin.ViewModels
         /// <param name="neededData"></param>
         private void RefleshChartData(TimeMaterialsPair[] neededData)
         {
-            Application.Current.Dispatcher.Invoke(() =>
+            FuelSeries.Clear();
+            AmmunitionSeries.Clear();
+            SteelSeries.Clear();
+            BauxiteSeries.Clear();
+            RepairToolSeries.Clear();
+            InstantBuildToolSeries.Clear();
+
+            foreach (var data in neededData)
             {
-                FuelSeries.Clear();
-                AmmunitionSeries.Clear();
-                SteelSeries.Clear();
-                BauxiteSeries.Clear();
-                RepairToolSeries.Clear();
-                InstantBuildToolSeries.Clear();
+                FuelSeries.Add(new ChartPoint(data.DateTime, data.Fuel));
+                AmmunitionSeries.Add(new ChartPoint(data.DateTime, data.Ammunition));
+                SteelSeries.Add(new ChartPoint(data.DateTime, data.Steel));
+                BauxiteSeries.Add(new ChartPoint(data.DateTime, data.Bauxite));
+                RepairToolSeries.Add(new ChartPoint(data.DateTime, data.RepairTool));
+                InstantBuildToolSeries.Add(new ChartPoint(data.DateTime, data.InstantBuildTool));
+            }
 
-                foreach (var data in neededData)
-                {
-                    FuelSeries.Add(new ChartPoint(data.DateTime, data.Fuel));
-                    AmmunitionSeries.Add(new ChartPoint(data.DateTime, data.Ammunition));
-                    SteelSeries.Add(new ChartPoint(data.DateTime, data.Steel));
-                    BauxiteSeries.Add(new ChartPoint(data.DateTime, data.Bauxite));
-                    RepairToolSeries.Add(new ChartPoint(data.DateTime, data.RepairTool));
-                    InstantBuildToolSeries.Add(new ChartPoint(data.DateTime, data.InstantBuildTool));
-                }
+            var currentDateTime = neededData[neededData.Length - 1].DateTime;
 
-                var currentDateTime = neededData[neededData.Length - 1].DateTime;
-
-                var storableLimit = new ObservableCollection<ChartPoint>();
-                storableLimit.Add(new ChartPoint(currentDateTime - ChartSettings.DisplayedPeriod.Value.ToTimeSpan(),
-                    materialManager.StorableMaterialLimit));
-                storableLimit.Add(new ChartPoint(currentDateTime, materialManager.StorableMaterialLimit));
-                this.StorableLimitSeries = storableLimit;
-            });
+            var storableLimit = new ObservableCollection<ChartPoint>();
+            storableLimit.Add(new ChartPoint(currentDateTime - ChartSettings.DisplayedPeriod.Value.ToTimeSpan(),
+                materialManager.StorableMaterialLimit));
+            storableLimit.Add(new ChartPoint(currentDateTime, materialManager.StorableMaterialLimit));
+            this.StorableLimitSeries = storableLimit;
         }
 
         /// <summary>
@@ -649,6 +657,15 @@ namespace MaterialChartPlugin.ViewModels
             setting.Value = !setting.Value;
             this.OnPropertyChanged(showPropertyName);
             this.OnPropertyChanged(visibilityPropertyName);
+        }
+
+        private static void InvokeOnUiThread(Action action)
+        {
+            var dispatcher = Application.Current?.Dispatcher;
+            if (dispatcher is null || dispatcher.CheckAccess())
+                action();
+            else
+                dispatcher.Invoke(action);
         }
 
         public void Dispose()

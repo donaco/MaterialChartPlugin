@@ -18,29 +18,27 @@ namespace MaterialChartPlugin.ViewModels
 
 	public class DisplayViewModel<T> : ObservableObject
 	{
-		private T _value;
 		public T Value
 		{
-			get { return _value; }
+			get { return field; }
 			set
 			{
-				if (!Equals(_value, value))
+				if (!Equals(field, value))
 				{
-					_value = value;
+					field = value;
 					this.OnPropertyChanged();
 				}
 			}
 		}
 
-		private string _display;
 		public string Display
 		{
-			get { return _display; }
+			get { return field; }
 			set
 			{
-				if (_display != value)
+				if (field != value)
 				{
-					_display = value;
+					field = value;
 					this.OnPropertyChanged();
 				}
 			}
