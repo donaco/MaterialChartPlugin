@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Reactive.Disposables;
 using System.Text;
@@ -313,7 +314,6 @@ namespace MaterialChartPlugin.ViewModels
         public ICommand OpenPopupWindowCommand { get; private set; }
         public ICommand ImportMaterialDataCommand { get; private set; }
         public ICommand ExportMaterialDataCommand { get; private set; }
-        public ICommand ExportAsCsvCommand { get; private set; }
 
         public ICommand ToggleFuelCommand { get; private set; }
         public ICommand ToggleAmmunitionCommand { get; private set; }
@@ -362,7 +362,6 @@ namespace MaterialChartPlugin.ViewModels
                 OpenPopupWindowCommand = new ViewModelCommand(OpenPopupWindow);
                 ImportMaterialDataCommand = new ViewModelCommand(async () => await ImportMaterialData());
                 ExportMaterialDataCommand = new ViewModelCommand(async () => await ExportMaterialData());
-                ExportAsCsvCommand = new ViewModelCommand(async () => await ExportAsCsv());
 
                 ToggleFuelCommand = new ViewModelCommand(() => ToggleSeriesVisibility(ChartSettings.ShowFuel, nameof(ShowFuel), nameof(FuelSeriesVisibility)));
                 ToggleAmmunitionCommand = new ViewModelCommand(() => ToggleSeriesVisibility(ChartSettings.ShowAmmunition, nameof(ShowAmmunition), nameof(AmmunitionSeriesVisibility)));
@@ -601,22 +600,6 @@ namespace MaterialChartPlugin.ViewModels
             YMax2 = ChartUtilities.GetYAxisMax(this.mostRepairTool, interval);
         }
 
-        public async Task ExportAsCsv()
-        {
-            var fileDialog = new SaveFileDialog()
-            {
-                Filter = "CSVファイル(*.csv)|*.csv|すべてのファイル(*.*)|*.*",
-                FilterIndex = 1,
-                Title = "エクスポート先の選択",
-                FileName = $"MaterialChartPlugin-{DateTime.Now:yyMMdd-HHmmssff}.csv",
-            };
-
-            if (fileDialog.ShowDialog() == true)
-            {
-                await materialManager.Log.ExportAsCsvAsync(fileDialog.FileName);
-            }
-        }
-
         public async Task ImportMaterialData()
         {
             var fileDialog = new OpenFileDialog()
@@ -640,15 +623,24 @@ namespace MaterialChartPlugin.ViewModels
         {
             var fileDialog = new SaveFileDialog()
             {
-                Filter = "データファイル(*.dat)|*.dat|すべてのファイル(*.*)|*.*",
+                Filter = "データファイル (*.dat)|*.dat|CSVファイル (*.csv)|*.csv",
                 FilterIndex = 1,
+                DefaultExt = ".dat",
+                AddExtension = true,
                 Title = "エクスポート先の選択",
                 FileName = $"MaterialChartPlugin-BackUp-{DateTime.Now:yyMMdd-HHmmssff}.dat",
             };
 
             if (fileDialog.ShowDialog() == true)
             {
-                await materialManager.Log.ExportAsync(fileDialog.FileName);
+                var isDataFile = fileDialog.FilterIndex == 1;
+                var extension = isDataFile ? ".dat" : ".csv";
+                var fileName = Path.ChangeExtension(fileDialog.FileName, extension);
+
+                if (isDataFile)
+                    await materialManager.Log.ExportAsync(fileName);
+                else
+                    await materialManager.Log.ExportAsCsvAsync(fileName);
             }
         }
 

@@ -386,9 +386,8 @@
 						Padding="10"
 						Margin="0,5,5,5"
 						Visibility="{Binding IsPopupMode, Converter={StaticResource InverseBoolToVisibilityConverter}}" />
-				<Button Content="バックアップデータのインポート" Command="{Binding ImportMaterialDataCommand}" Padding="10" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,5,5,5"/>
-				<Button Content="バックアップデータのエクスポート" Command="{Binding ExportMaterialDataCommand}" Padding="10" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,5,5,5"/>
-				<Button Content=".csv形式でエクスポート" Command="{Binding ExportAsCsvCommand}" Padding="10" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,5,5,5"/>
+				<Button Content="インポート" Command="{Binding ImportMaterialDataCommand}" Padding="10" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,5,5,5"/>
+				<Button Content="エクスポート" Command="{Binding ExportMaterialDataCommand}" Padding="10" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,5,5,5"/>
 			</WrapPanel>
         </StackPanel>
     </ScrollViewer>
