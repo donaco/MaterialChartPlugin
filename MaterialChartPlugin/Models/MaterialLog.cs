@@ -93,18 +93,6 @@ namespace MaterialChartPlugin.Models
                 {
                     // 旧形式(protobuf-net)のデータファイルは読めないためリネームして退避
                     System.Diagnostics.Debug.WriteLine($"MaterialLog: Old format detected, renaming - {ex.Message}");
-                    try
-                    {
-                        var backupPath = filePath + ".old";
-                        if (File.Exists(backupPath))
-                            File.Delete(backupPath);
-                        File.Move(filePath, backupPath);
-                    }
-                    catch (IOException ioEx)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"MaterialLog: Failed to rename old file - {ioEx.Message}");
-                    }
-
                     SetHistory(Array.Empty<TimeMaterialsPair>());
                 }
                 catch (Exception ex)
@@ -154,15 +142,29 @@ namespace MaterialChartPlugin.Models
                     Directory.CreateDirectory(directoryPath);
 
                 var snapshot = GetHistoryListSnapshot();
+                var temporaryFilePath = filePath + $".{Guid.NewGuid():N}.tmp";
 
-                await Task.Run(() =>
+                try
                 {
-                    using (var stream = new FileStream(filePath, FileMode.Create, FileAccess.Write))
-                    using (var writer = XmlDictionaryWriter.CreateBinaryWriter(stream))
+                    await Task.Run(() =>
                     {
-                        serializer.WriteObject(writer, snapshot);
-                    }
-                });
+                        using (var stream = new FileStream(temporaryFilePath, FileMode.CreateNew, FileAccess.Write, FileShare.None))
+                        using (var writer = XmlDictionaryWriter.CreateBinaryWriter(stream))
+                        {
+                            serializer.WriteObject(writer, snapshot);
+                        }
+                    });
+
+                    if (File.Exists(filePath))
+                        File.Replace(temporaryFilePath, filePath, null);
+                    else
+                        File.Move(temporaryFilePath, filePath);
+                }
+                finally
+                {
+                    if (File.Exists(temporaryFilePath))
+                        File.Delete(temporaryFilePath);
+                }
             }
             finally
             {
