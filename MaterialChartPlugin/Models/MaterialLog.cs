@@ -66,6 +66,8 @@ namespace MaterialChartPlugin.Models
 
         private async Task LoadAsync(string filePath, Func<Task> onSuccess)
         {
+            var canSaveAfterLoad = true;
+
             lock (_historyLock)
             {
                 if (_isDisposed) return;
@@ -91,15 +93,27 @@ namespace MaterialChartPlugin.Models
                 }
                 catch (SerializationException ex)
                 {
-                    // 旧形式(protobuf-net)のデータファイルは読めないためリネームして退避
-                    System.Diagnostics.Debug.WriteLine($"MaterialLog: Old format detected, renaming - {ex.Message}");
+                    var backedUp = TryBackupUnreadableFile(filePath, out var backupFilePath);
+                    canSaveAfterLoad = backedUp;
+                    var backupMessage = backedUp
+                        ? $"元データを退避しました: {backupFilePath}"
+                        : "元データを退避できなかったため、データの自動保存を停止しました。";
+                    plugin.InvokeNotifyRequested(new Grabacr07.KanColleViewer.Composition.NotifyEventArgs(
+                        "MaterialChartPlugin.LoadFailed", "読み込み失敗",
+                        $"資材データが旧形式または破損しているため読み込めませんでした。{backupMessage}"));
+                    System.Diagnostics.Debug.WriteLine($"MaterialLog: Old format or invalid data - {ex}");
                     SetHistory(Array.Empty<TimeMaterialsPair>());
                 }
                 catch (Exception ex)
                 {
+                    var backedUp = TryBackupUnreadableFile(filePath, out var backupFilePath);
+                    canSaveAfterLoad = backedUp;
+                    var backupMessage = backedUp
+                        ? $"元データを退避しました: {backupFilePath}"
+                        : "元データを退避できなかったため、データの自動保存を停止しました。";
                     plugin.InvokeNotifyRequested(new Grabacr07.KanColleViewer.Composition.NotifyEventArgs(
                         "MaterialChartPlugin.LoadFailed", "読み込み失敗",
-                        "資材データの読み込みに失敗しました。データが破損しているか、形式が古い可能性があります。"));
+                        $"資材データの読み込みに失敗しました。{backupMessage}"));
                     System.Diagnostics.Debug.WriteLine($"MaterialLog: Load exception - {ex}");
                     if (History is null)
                         SetHistory(Array.Empty<TimeMaterialsPair>());
@@ -114,7 +128,34 @@ namespace MaterialChartPlugin.Models
             lock (_historyLock)
             {
                 if (!_isDisposed)
-                    this.HasLoaded = true;
+                    this.HasLoaded = canSaveAfterLoad;
+            }
+        }
+
+        private static bool TryBackupUnreadableFile(string filePath, out string backupFilePath)
+        {
+            backupFilePath = $"{filePath}.{Guid.NewGuid():N}.bak";
+
+            try
+            {
+                File.Copy(filePath, backupFilePath);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                try
+                {
+                    if (File.Exists(backupFilePath))
+                        File.Delete(backupFilePath);
+                }
+                catch (Exception cleanupException)
+                {
+                    System.Diagnostics.Debug.WriteLine($"MaterialLog: Backup cleanup failed - {cleanupException}");
+                }
+
+                System.Diagnostics.Debug.WriteLine($"MaterialLog: Backup failed for '{filePath}' - {ex}");
+                backupFilePath = null;
+                return false;
             }
         }
 
