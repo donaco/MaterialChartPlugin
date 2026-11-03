@@ -28,33 +28,33 @@ namespace MaterialChartPlugin.Views
 
             _toolTipTitleBlock = new TextBlock
             {
-                Foreground = Brushes.White,
                 FontWeight = FontWeights.Bold,
                 FontSize = 13,
                 Margin = new Thickness(8, 6, 8, 2)
             };
+            _toolTipTitleBlock.SetResourceReference(TextBlock.ForegroundProperty, "ActiveForegroundBrushKey");
 
             _toolTipDateBlock = new TextBlock
             {
-                Foreground = Brushes.LightGray,
                 FontSize = 12,
                 Margin = new Thickness(8, 2, 8, 2)
             };
+            _toolTipDateBlock.SetResourceReference(TextBlock.ForegroundProperty, "SemiActiveForegroundBrushKey");
 
             _toolTipValueBlock = new TextBlock
             {
-                Foreground = Brushes.White,
                 FontSize = 14,
                 FontWeight = FontWeights.Bold,
                 Margin = new Thickness(8, 2, 8, 6)
             };
+            _toolTipValueBlock.SetResourceReference(TextBlock.ForegroundProperty, "ActiveForegroundBrushKey");
 
             var panel = new StackPanel
             {
                 Orientation = Orientation.Vertical,
-                Background = new SolidColorBrush(Color.FromArgb(240, 50, 50, 50)),
                 Margin = new Thickness(0)
             };
+            panel.SetResourceReference(Panel.BackgroundProperty, "BackgroundBrushKey");
 
             panel.Children.Add(_toolTipTitleBlock);
             panel.Children.Add(_toolTipDateBlock);
@@ -64,12 +64,12 @@ namespace MaterialChartPlugin.Views
             {
                 Content = panel,
                 Placement = System.Windows.Controls.Primitives.PlacementMode.Mouse,
-                BorderBrush = Brushes.Gray,
                 BorderThickness = new Thickness(1),
                 Padding = new Thickness(0),
-                Background = Brushes.Transparent,
                 IsOpen = false
             };
+            _chartToolTip.SetResourceReference(Control.BorderBrushProperty, "BorderBrushKey");
+            _chartToolTip.SetResourceReference(Control.BackgroundProperty, "BackgroundBrushKey");
         }
 
         /// <summary>
