@@ -54,6 +54,18 @@ namespace MaterialChartPlugin
 
         public MaterialChartPlugin()
         {
+            try
+            {
+                Models.Settings.SettingsProviders.MigrateLegacyData();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"MaterialChartPlugin data migration failed: {ex}");
+                System.Windows.MessageBox.Show(
+                    $"MaterialChart のデータ移行に失敗しました。元のデータは削除していません。\r\n\r\nエラーの詳細: {ex.Message}",
+                    "MaterialChart", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+                throw;
+            }
             viewModel = new ToolViewModel(this);
         }
 

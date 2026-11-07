@@ -15,9 +15,7 @@ namespace MaterialChartPlugin.Models
 {
     public class MaterialLog : ObservableObject, IDisposable
     {
-        static readonly string localDirectoryPath = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "terry_u16", "MaterialChartPlugin");
+        static readonly string localDirectoryPath = Settings.SettingsProviders.DataDirectoryPath;
 
         public static readonly string ExportDirectoryPath = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
